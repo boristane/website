@@ -47,11 +47,32 @@ function navBar() {
         const x = $('.sub-nav');
         if (x.classList.contains('responsive')) {
             x.classList.remove('responsive');
+            this.classList.remove('highlighted');
         } else {
             x.classList.add('responsive');
+            this.classList.add('highlighted');
         }
     }
+
+    $s('.sub-nav .tab').forEach((tab, index) => {
+        tab.addEventListener('mouseover', () => {
+            $s('.sub-nav .underlined')[index].style.opacity = 1;
+        });
+        tab.addEventListener('mouseout', () => {
+            $s('.sub-nav .underlined')[index].style.opacity = 0;
+        });
+    });
+
+    $('.menu').addEventListener('mouseover', () => {
+        $('.nav-bar .underlined').style.opacity = 1;
+    });
+
+    $('.menu').addEventListener('mouseout', () => {
+        $('.nav-bar .underlined').style.opacity = 0;
+    });
+
     $('.icon').addEventListener('click', openDrawerMenu);
+    $('.menu').addEventListener('click', openDrawerMenu);
 }
 
 const helloTranslations = ['Bonjour', 'Hola', 'Hallo', 'Namaste', 'Salaam',

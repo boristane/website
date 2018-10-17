@@ -10,7 +10,7 @@
 }
 
 .nav-bar .social:hover {
-    color: rgb(54, 141, 170);
+    color: #FE8566
 }
 
 .nav-bar {
@@ -18,16 +18,31 @@
     border-bottom: 1px solid lightgray;
 }
 
-.nav-bar .icon{
+.nav-bar .icon {
     display: none;
 }
 
-.sub-nav {
-    display: none;
+.nav-bar .menu {
+    display: inline-block;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1.1em;
+    border-right: 1px solid lightgray;
+    box-sizing: border-box;
+    height: 40px;
+    width: 120px;
     text-align: center;
-    width: 100%;
-    background-color: rgba(173, 216, 230, 0.5);
-    height: 60px;
+    color: lightgrey;
+    margin-left: -30px;
+}
+
+.sub-nav {
+    position: absolute;
+    box-sizing: border-box;
+    width: 0;
+    background-color: #FE8566;
+    height: 0;
+    color: white;
+    overflow: hidden;
 }
 
 .sub-nav .tab {
@@ -38,7 +53,60 @@
     top: 20px;
 }
 
-@media (max-width: 1223px) {
+.sub-nav.responsive {
+    height: 60px;
+    width: 45%;
+}
+
+.nav-bar .highlighted {
+    color: white;
+    background-color: #FE8566
+}
+
+.sub-nav.animated {
+    transition: all 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.nav-bar .animated {
+    transition: all 0.2 cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.sub-nav .underlined {
+    position: relative;
+    top: 10px;
+    left: 35px;
+    display: inline-block;
+    border-bottom: 2px white solid;
+    width: 30px;
+    opacity: 0;
+}
+
+.nav-bar .underlined {
+    position: relative;
+    top: 15px;
+    left: 30px;
+    display: inline-block;
+    border-bottom: 2px lightgray solid;
+    width: 30px;
+    opacity: 0;
+}
+
+.menu.highlighted .underlined {
+    border-bottom: 2px white solid;
+}
+
+.underlined.animated {
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+@media (max-width: 1024px) and (min-width: 768px) {
+    .sub-nav.responsive {
+        height: 60px;
+        width: 100%;
+    }
+}
+
+@media (max-width: 767px) {
     .nav-bar span.icon {
         display: inline;
         height: 30px;
@@ -50,7 +118,12 @@
     }
 
     .sub-nav.responsive {
-        display: block;
+        height: 60px;
+        width: 100%;
+    }
+
+    .nav-bar .menu{
+        display: none;
     }
 }
 
