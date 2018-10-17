@@ -34,9 +34,6 @@ function randomiseStringInDOMElt(elt) {
     });
 }
 
-const helloTranslations = ['Bonjour', 'Hola', 'Hallo', 'Namaste', 'Salaam',
-    'Konnichiwa', 'Merhaba', 'Marhaba', 'Ni Hau', 'Hoi', 'Shalom', 'Sawubona'];
-
 function $(s) {
     return document.getElementById(s) || document.querySelector(s);
 }
@@ -44,6 +41,22 @@ function $(s) {
 function $s(s) {
     return document.querySelectorAll(s);
 }
+
+function navBar() {
+    function openDrawerMenu() {
+        const x = $('.sub-nav');
+        if (x.classList.contains('responsive')) {
+            x.classList.remove('responsive');
+        } else {
+            x.classList.add('responsive');
+        }
+    }
+    $('.icon').addEventListener('click', openDrawerMenu);
+}
+
+const helloTranslations = ['Bonjour', 'Hola', 'Hallo', 'Namaste', 'Salaam',
+    'Ni Hau', 'Hoi', 'Shalom'];
+
 
 document.addEventListener('DOMContentLoaded', () => {
     function hello() {
@@ -59,4 +72,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     hello();
+    navBar();
 });

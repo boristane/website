@@ -1,0 +1,67 @@
+
+.nav-bar .social{
+    border-left: 1px solid lightgray;
+    height: 30px;
+    width: 40px;
+    float: right;
+    text-align: center;
+    font-size: 1.1em;
+    padding-top: 10px;
+}
+
+.nav-bar .social:hover {
+    color: rgb(54, 141, 170);
+}
+
+.nav-bar {
+    overflow: hidden;
+    border-bottom: 1px solid lightgray;
+}
+
+.nav-bar .icon{
+    display: none;
+}
+
+.sub-nav {
+    display: none;
+    text-align: center;
+    width: 100%;
+    background-color: rgba(173, 216, 230, 0.5);
+    height: 60px;
+}
+
+.sub-nav .tab {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1em;
+    padding: 0 10px;
+    position: relative;
+    top: 20px;
+}
+
+@media (max-width: 1223px) {
+    .nav-bar span.icon {
+        display: inline;
+        height: 30px;
+        width: 40px;
+        float: left;
+        text-align: center;
+        font-size: 1.1em;
+        padding-top: 10px;
+    }
+
+    .sub-nav.responsive {
+        display: block;
+    }
+}
+
+.nav-bar a:link {
+    color: lightgray;
+}
+
+.nav-bar a:visited {
+    color: lightgray;
+}
+
+.nav-bar a:active {
+    color: lightgray;
+}
