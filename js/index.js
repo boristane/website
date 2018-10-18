@@ -43,14 +43,29 @@ function $s(s) {
 }
 
 function navBar() {
+    function stickyNav() {
+        const stickyHeightThreshold = $('.nav-bar').offsetTop;
+        if (window.pageYOffset >= stickyHeightThreshold + 1) {
+            const topContainer = $s('.content-container')[0];
+            $('.nav-bar').classList.add('sticky');
+            topContainer.style.marginTop = stickyHeightThreshold;
+        } else {
+            $('.nav-bar').classList.remove('sticky');
+        }
+    }
+
     function openDrawerMenu() {
         const x = $('.sub-nav');
         if (x.classList.contains('responsive')) {
             x.classList.remove('responsive');
-            this.classList.remove('highlighted');
+            $('.icon').classList.remove('highlighted');
+            $('.menu').classList.remove('highlighted');
+            $('html').classList.remove('no-scroll');
         } else {
             x.classList.add('responsive');
-            this.classList.add('highlighted');
+            $('.icon').classList.add('highlighted');
+            $('.menu').classList.add('highlighted');
+            $('html').classList.add('no-scroll');
         }
     }
 
@@ -73,11 +88,17 @@ function navBar() {
 
     $('.icon').addEventListener('click', openDrawerMenu);
     $('.menu').addEventListener('click', openDrawerMenu);
+
+    window.addEventListener('scroll', stickyNav);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && $('.sub-nav').classList.contains('responsive')) {
+            openDrawerMenu();
+        }
+    });
 }
 
-const helloTranslations = ['Bonjour', 'Hola', 'Hallo', 'Namaste', 'Salaam',
-    'Ni Hau', 'Hoi', 'Shalom'];
-
+const helloTranslations = ['Salut !', 'Hola !', 'Hej !', 'Merhaba !', 'Привет', 'Olá !', 'Hallo !', 'Ciao !', '여보세요', 'もしもし', '你好', 'مرحبا'];
 
 document.addEventListener('DOMContentLoaded', () => {
     function hello() {
@@ -85,10 +106,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const interval = 2000;
         setInterval(() => {
             const randomIndex = Math.floor(Math.random() * workingHellos.length);
-            $('hello').textContent = `${workingHellos[randomIndex]} !`;
+            $('hello').textContent = workingHellos[randomIndex];
             randomiseStringInDOMElt($('hello'));
             workingHellos = workingHellos.filter(elt => elt !== workingHellos[randomIndex]);
-            if (workingHellos.length === 0) workingHellos = [...helloTranslations, 'Hello'];
+            if (workingHellos.length === 0) workingHellos = [...helloTranslations, 'Hello !'];
         }, interval);
     }
 

@@ -16,6 +16,13 @@
 .nav-bar {
     overflow: hidden;
     border-bottom: 1px solid lightgray;
+    background: white;
+}
+
+.sticky {
+    position: fixed;
+    top: 0px;
+    width: 100%;
 }
 
 .nav-bar .icon {
@@ -55,7 +62,7 @@
 
 .sub-nav.responsive {
     height: 60px;
-    width: 45%;
+    width: 50%;
 }
 
 .nav-bar .highlighted {
@@ -96,6 +103,10 @@
 
 .underlined.animated {
     transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.no-scroll {
+    overflow: hidden;
 }
 
 @media (max-width: 1024px) and (min-width: 768px) {

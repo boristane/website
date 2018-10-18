@@ -19,6 +19,8 @@ html, body {
     width: 50%;
     right: 0;
     padding: 20px 1% 20px 1%;
+    height: calc(100vh - 41px);
+    border-left: 1px solid #FE8566;
 }
 
 #hello {
@@ -28,6 +30,7 @@ html, body {
     font-family: 'Times New Roman', Times, serif;
     font-weight: 300;
     color: #eaeaea;
+    white-space: nowrap;
 }
 
 .intro {
@@ -49,7 +52,7 @@ html, body {
 
 .details {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 1.1em;
+    font-size: 1.0em;
     width: 100%;
     margin-top: 50px;
     color: grey;
@@ -127,6 +130,8 @@ html, body {
     .right {
         position: inherit;
         width: 100%;
+        border-top: 1px solid #FE8566;
+        border-left: none;
     }
 
     .details {
@@ -159,6 +164,8 @@ html, body {
     .right {
         position: inherit;
         width: 100%;
+        border-top: 1px solid #FE8566;
+        border-left: none;
     }
 
     .details {
