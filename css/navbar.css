@@ -42,13 +42,13 @@
     background-color: #FE8566;
     height: 0;
     color: white;
-    overflow: hidden;
+    padding-left: 15px;
 }
 
 .sub-nav .tab {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 1em;
-    padding: 0 10px;
+    padding-top: 15px;
     position: relative;
     top: 20px;
 }
@@ -64,17 +64,16 @@
 }
 
 .sub-nav.animated {
-    transition: all 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    transition: all 0.2s cubic-bezier(1, -0.01, 0, 1);
 }
 
 .nav-bar .animated {
-    transition: all 0.2 cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    transition: all 0.2s cubic-bezier(1, -0.01, 0, 1);
 }
 
 .sub-nav .underlined {
     position: relative;
     top: 10px;
-    left: 35px;
     display: inline-block;
     border-bottom: 2px white solid;
     width: 30px;
@@ -101,8 +100,14 @@
 
 @media (max-width: 1024px) and (min-width: 768px) {
     .sub-nav.responsive {
-        height: 60px;
+        height: calc(100vh - 40px);
         width: 100%;
+        opacity: 0.9;
+    }
+
+    .sub-nav .tab {
+        display: block;
+        height: 40px;
     }
 }
 
@@ -118,12 +123,18 @@
     }
 
     .sub-nav.responsive {
-        height: 60px;
+        height: calc(100vh - 40px);
         width: 100%;
+        opacity: 0.9;
     }
 
     .nav-bar .menu{
         display: none;
+    }
+
+    .sub-nav .tab {
+        display: block;
+        height: 40px;
     }
 }
 
@@ -137,4 +148,19 @@
 
 .nav-bar a:active {
     color: lightgray;
+}
+
+.sub-nav a:link {
+    color: white;
+    text-decoration: none;
+}
+
+.sub-nav a:visited {
+    color: white;
+    text-decoration: none;
+}
+
+.sub-nav a:active {
+    color: white;
+    text-decoration: none;
 }

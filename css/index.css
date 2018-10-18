@@ -10,16 +10,15 @@ html, body {
 
 .left {
     width: 50%;
-    min-width: 700px;
     background-color: #ffffff;
-    padding: 20px 0% 20px 9%;
+    padding: 20px 1% 20px 6%;
     top: 150px;
 }
 
 .right {
     width: 50%;
     right: 0;
-    padding: 20px 1% 20px 0%;
+    padding: 20px 1% 20px 1%;
 }
 
 #hello {
@@ -48,6 +47,35 @@ html, body {
     cursor: pointer;
 }
 
+.details {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.1em;
+    width: 100%;
+    margin-top: 50px;
+    color: grey;
+    text-align: justify;
+}
+
+.details a:link {
+    color: black;
+    text-decoration: none;
+}
+
+.details a:visited {
+    color: black;
+    text-decoration: none;
+}
+
+.details a:active {
+    color: black;
+    text-decoration: none;
+}
+
+.details a:hover {
+    color: #FE8566;
+    text-decoration: none;
+}
+
 @media (max-width: 1400px) and (min-width: 1024px) {
     .content-container {
         padding: 20px 4% 20px 4%;
@@ -65,12 +93,12 @@ html, body {
     }
 
     .left {
-        padding: 20px 0% 20px 4%;
+        padding: 20px 4% 20px 4%;
         top: 150px;
     }
 
     .right {
-        padding: 20px 4% 20px 1%;
+        padding: 20px 1% 20px 1%;
     }
 }
 
@@ -93,12 +121,16 @@ html, body {
     .left {
         position: inherit;
         width: 100%;
-        margin-top: 80px;
+        margin-top: 0px;
     }
 
     .right {
         position: inherit;
         width: 100%;
+    }
+
+    .details {
+        margin: 0;
     }
 }
 
@@ -120,12 +152,16 @@ html, body {
 
     .left {
         position: inherit;
-        min-width: 100%;
-        margin-top: 80px;
+        width: 100%;
+        margin-top: 0px;
     }
 
     .right {
         position: inherit;
         width: 100%;
+    }
+
+    .details {
+        margin: 0;
     }
 }
