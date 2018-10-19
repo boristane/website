@@ -11,7 +11,7 @@ html, body {
 .left {
     width: 50%;
     background-color: #ffffff;
-    padding: 20px 1% 20px 6%;
+    padding: 20px 6% 20px 6%;
     top: 150px;
 }
 
@@ -20,6 +20,7 @@ html, body {
     right: 0;
     padding: 20px 1% 20px 1%;
     height: calc(100vh - 41px);
+    min-height: 640px;
     border-left: 1px solid #FE8566;
 }
 
@@ -31,6 +32,7 @@ html, body {
     font-weight: 300;
     color: #eaeaea;
     white-space: nowrap;
+    overflow: hidden;
 }
 
 .intro {
@@ -44,6 +46,15 @@ html, body {
 
 #name {
     font-weight: 800;
+}
+
+.top {
+    position: absolute;
+    top: -109px;
+    right: 0;
+    box-sizing: border-box;
+    width: 100%;
+    text-align: right;
 }
 
 .pointer {
@@ -137,6 +148,10 @@ html, body {
     .details {
         margin: 0;
     }
+
+    .top {
+        top: 41px;
+    }
 }
 
 @media (max-width: 767px) {
@@ -170,5 +185,9 @@ html, body {
 
     .details {
         margin: 0;
+    }
+
+    .top {
+        top: 41px;
     }
 }
