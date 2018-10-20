@@ -55,8 +55,11 @@ function snakeGame(container) {
     canvas.style.boxSizing = 'border-box';
     canvas.width = rounding(container.clientWidth, gridSize);
     canvas.height = rounding(container.clientHeight, gridSize);
-    canvas.style.paddingTop = `${padding}px`;
-    canvas.style.paddingLeft = `${padding}px`;
+    canvas.style.padding = `${padding}px`;
+    canvas.style.width = '100%';
+    canvas.style.maxWidth = `${canvas.width}px`;
+    canvas.style.borderBottom = 'dashed 1px #FE8566';
+    canvas.style.borderRight = 'dashed 1px #FE8566';
     const ctx = canvas.getContext('2d');
 
     let count;
@@ -67,15 +70,14 @@ function snakeGame(container) {
         return parseInt(Math.random() * (max - min) + min, 10);
     }
 
-    function newApplePos(c, g, snake) {
+    function newApplePos(c, g, s) {
         const numGridsInWidth = Math.floor(c.width / g);
         const numGridsInHeight = Math.floor(c.height / g);
         const x = randomInt(0, numGridsInWidth) * g;
         const y = randomInt(0, numGridsInHeight) * g;
-        for (let i = 0; i < snake.cells.length; i++) {
-            if (snake.cells[i].x === x && snake.cells[i].y === y) {
-                console.log('there')
-                return newApplePos(c, g, snake);
+        for (let i = 0; i < s.cells.length; i += 1) {
+            if (s.cells[i].x === x && s.cells[i].y === y) {
+                return newApplePos(c, g, s);
             }
         }
         return { x, y };
@@ -156,16 +158,19 @@ function snakeGame(container) {
 
         // keyboard event listeners
         document.addEventListener('keydown', (e) => {
-            if (e.which === 37 && snake.dx === 0) {
+            if (e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39 || e.keyCode === 40) {
+                e.preventDefault();
+            }
+            if (e.keyCode === 37 && snake.dx === 0) {
                 snake.dx = -gridSize;
                 snake.dy = 0;
-            } else if (e.which === 38 && snake.dy === 0) {
+            } else if (e.keyCode === 38 && snake.dy === 0) {
                 snake.dy = -gridSize;
                 snake.dx = 0;
-            } else if (e.which === 39 && snake.dx === 0) {
+            } else if (e.keyCode === 39 && snake.dx === 0) {
                 snake.dx = gridSize;
                 snake.dy = 0;
-            } else if (e.which === 40 && snake.dy === 0) {
+            } else if (e.keyCode === 40 && snake.dy === 0) {
                 snake.dy = gridSize;
                 snake.dx = 0;
             }

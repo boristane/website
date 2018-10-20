@@ -81,11 +81,6 @@ html, body {
     text-decoration: none;
 }
 
-canvas {
-    box-sizing: border-box;
-    width: 100%;
-}
-
 @media (max-width: 1400px) and (min-width: 1024px) {
     .content-container {
         padding: 20px 4% 20px 4%;
@@ -112,7 +107,7 @@ canvas {
     }
 }
 
-@media (max-width: 1024px) and (min-width: 768px) {
+@media (max-width: 1023px) and (min-width: 768px) {
     .content-container {
         padding: 20px 6% 20px 6%;
     }
