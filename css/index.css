@@ -48,15 +48,6 @@ html, body {
     font-weight: 800;
 }
 
-.top {
-    position: absolute;
-    top: -109px;
-    right: 0;
-    box-sizing: border-box;
-    width: 100%;
-    text-align: right;
-}
-
 .pointer {
     cursor: pointer;
 }
@@ -148,10 +139,6 @@ html, body {
     .details {
         margin: 0;
     }
-
-    .top {
-        top: 41px;
-    }
 }
 
 @media (max-width: 767px) {
@@ -185,9 +172,5 @@ html, body {
 
     .details {
         margin: 0;
-    }
-
-    .top {
-        top: 41px;
     }
 }
