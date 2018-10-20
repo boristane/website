@@ -42,6 +42,140 @@ function $s(s) {
     return document.querySelectorAll(s);
 }
 
+function snakeGame(container) {
+    const gridSize = Math.floor(container.clientWidth / 20);
+
+    function rounding(num, step) {
+        return Math.floor(num / step) * step;
+    }
+
+    const canvas = document.createElement('canvas');
+    container.appendChild(canvas);
+    const padding = 3;
+    canvas.style.boxSizing = 'border-box';
+    canvas.width = rounding(container.clientWidth, gridSize);
+    canvas.height = rounding(container.clientHeight, gridSize);
+    canvas.style.paddingTop = `${padding}px`;
+    canvas.style.paddingLeft = `${padding}px`;
+    const ctx = canvas.getContext('2d');
+
+    let count;
+    let snake;
+    let apple;
+
+    function randomInt(min, max) {
+        return parseInt(Math.random() * (max - min) + min, 10);
+    }
+
+    function newApplePos(c, g, snake) {
+        const numGridsInWidth = Math.floor(c.width / g);
+        const numGridsInHeight = Math.floor(c.height / g);
+        const x = randomInt(0, numGridsInWidth) * g;
+        const y = randomInt(0, numGridsInHeight) * g;
+        for (let i = 0; i < snake.cells.length; i++) {
+            if (snake.cells[i].x === x && snake.cells[i].y === y) {
+                console.log('there')
+                return newApplePos(c, g, snake);
+            }
+        }
+        return { x, y };
+    }
+
+    function initialiseGame() {
+        count = 0;
+
+        snake = {
+            x: 3 * gridSize,
+            y: 3 * gridSize,
+            dx: gridSize,
+            dy: 0,
+            cells: [],
+            length: 4,
+        };
+
+        apple = {
+            x: 8 * gridSize,
+            y: 8 * gridSize,
+        };
+    }
+
+    function loop() {
+        requestAnimationFrame(loop);
+        count += 1;
+        if (count < 4) {
+            return;
+        }
+        count = 0;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        snake.x += snake.dx;
+        snake.y += snake.dy;
+
+        if (snake.x >= canvas.width) {
+            snake.x = 0;
+        } else if (snake.x < 0) {
+            snake.x = canvas.width - gridSize;
+        }
+        if (snake.y >= canvas.height) {
+            snake.y = 0;
+        } else if (snake.y < 0) {
+            snake.y = canvas.height - gridSize;
+        }
+
+        // add current head to snake cells
+        snake.cells.unshift({ x: snake.x, y: snake.y });
+        // pop the tail of the snake from cells
+        if (snake.cells.length > snake.length) {
+            snake.cells.pop();
+        }
+
+        ctx.fillStyle = '#FE8566';
+        ctx.fillRect(apple.x, apple.y, gridSize - 1, gridSize - 1);
+
+        ctx.fillStyle = '#40ADA3';
+        snake.cells.forEach((cell, index, cells) => {
+            ctx.fillRect(cell.x, cell.y, gridSize - 1, gridSize - 1);
+
+            // Check for collision with the head
+            if (index !== 0 && cells[0].x === cell.x && cells[0].y === cell.y) {
+                initialiseGame();
+            }
+        });
+
+        if (snake.x === apple.x && snake.y === apple.y) {
+            snake.length += 1;
+            const { x, y } = newApplePos(canvas, gridSize, snake);
+            apple.x = x;
+            apple.y = y;
+        }
+
+        // display score
+        ctx.fillStyle = '#40ADA3';
+        ctx.font = `${gridSize / 1.2}px monospace`;
+        ctx.fillText(`${snake.length}`, snake.length <= 9 ? gridSize / 5 : 0, gridSize / 1.5);
+
+        // keyboard event listeners
+        document.addEventListener('keydown', (e) => {
+            if (e.which === 37 && snake.dx === 0) {
+                snake.dx = -gridSize;
+                snake.dy = 0;
+            } else if (e.which === 38 && snake.dy === 0) {
+                snake.dy = -gridSize;
+                snake.dx = 0;
+            } else if (e.which === 39 && snake.dx === 0) {
+                snake.dx = gridSize;
+                snake.dy = 0;
+            } else if (e.which === 40 && snake.dy === 0) {
+                snake.dy = gridSize;
+                snake.dx = 0;
+            }
+        });
+    }
+
+    initialiseGame();
+    requestAnimationFrame(loop);
+}
+
 function navBar() {
     function stickyNav() {
         const stickyHeightThreshold = $('.nav-bar').offsetTop;
@@ -118,4 +252,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     hello();
     navBar();
+    snakeGame($('.content-container.right'));
 });

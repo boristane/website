@@ -18,7 +18,7 @@ html, body {
 .right {
     width: 50%;
     right: 0;
-    padding: 20px 1% 20px 1%;
+    padding: 0;
     height: calc(100vh - 41px);
     min-height: 640px;
     border-left: 1px solid #FE8566;
@@ -81,6 +81,11 @@ html, body {
     text-decoration: none;
 }
 
+canvas {
+    box-sizing: border-box;
+    width: 100%;
+}
+
 @media (max-width: 1400px) and (min-width: 1024px) {
     .content-container {
         padding: 20px 4% 20px 4%;
@@ -103,7 +108,7 @@ html, body {
     }
 
     .right {
-        padding: 20px 1% 20px 1%;
+        padding: 0;
     }
 }
 
@@ -134,6 +139,7 @@ html, body {
         width: 100%;
         border-top: 1px solid #FE8566;
         border-left: none;
+        padding: 0;
     }
 
     .details {
@@ -168,6 +174,7 @@ html, body {
         width: 100%;
         border-top: 1px solid #FE8566;
         border-left: none;
+        padding: 0;
     }
 
     .details {
