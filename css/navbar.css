@@ -1,6 +1,7 @@
 
 .nav-bar .social{
     border-left: 1px solid lightgray;
+    border-top: 1px solid lightgray;
     height: 30px;
     width: 40px;
     float: right;
@@ -10,163 +11,25 @@
 }
 
 .nav-bar .social:hover {
-    color: #FE8566
+    background-color: #FE8566;
+    color: white;
 }
 
 .nav-bar {
+    position: fixed;
+    bottom: 0px;
     overflow: hidden;
-    border-bottom: 1px solid lightgray;
     background: white;
-}
-
-.nav-bar .icon {
-    display: none;
-}
-
-.nav-bar .menu {
-    display: inline-block;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 1.1em;
-    border-right: 1px solid lightgray;
-    box-sizing: border-box;
-    height: 40px;
-    width: 120px;
-    text-align: center;
-    color: lightgrey;
-    margin-left: -30px;
-}
-
-.sub-nav {
-    position: absolute;
-    box-sizing: border-box;
-    width: 0;
-    background-color: #FE8566;
-    height: 0;
-    color: white;
-    padding-left: 15px;
-    overflow: hidden;
-}
-
-.sub-nav .tab {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 1em;
-    padding-top: 15px;
-    position: relative;
-    top: 20px;
-}
-
-.sub-nav.responsive {
-    height: 60px;
     width: 50%;
 }
 
-.nav-bar .highlighted {
-    color: white;
-    background-color: #FE8566
-}
 
-.sub-nav.animated {
-    transition: all 0.2s cubic-bezier(1, -0.01, 0, 1);
-}
-
-.nav-bar .animated {
-    transition: all 0.2s cubic-bezier(1, -0.01, 0, 1);
-}
-
-.sub-nav .underlined {
-    position: relative;
-    top: 10px;
-    display: inline-block;
-    border-bottom: 2px white solid;
-    width: 30px;
-    opacity: 0;
-}
-
-.nav-bar .underlined {
-    position: relative;
-    top: 15px;
-    left: 30px;
-    display: inline-block;
-    border-bottom: 2px lightgray solid;
-    width: 30px;
-    opacity: 0;
-}
-
-.menu.highlighted .underlined {
-    border-bottom: 2px white solid;
-}
-
-.underlined.animated {
-    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-}
-
-.no-scroll {
-    overflow: hidden;
-}
-
-@media (max-width: 1024px) and (min-width: 768px) {
-    .sub-nav.responsive {
-        height: calc(100vh - 40px);
+@media (max-width: 1024px) {
+    .nav-bar {
         width: 100%;
-        opacity: 0.9;
-    }
-
-    .sub-nav .tab {
-        display: block;
-        height: 40px;
-    }
-
-    .sticky {
-        position: fixed;
-        top: 0px;
-        width: 100%;
-        z-index: 1;
-    }
-
-    .sticky.sub-nav {
-        position: fixed;
-        top: 40px;
     }
 }
 
-@media (max-width: 767px) {
-    .nav-bar span.icon {
-        display: inline;
-        height: 30px;
-        width: 40px;
-        float: left;
-        text-align: center;
-        font-size: 1.1em;
-        padding-top: 10px;
-    }
-
-    .sub-nav.responsive {
-        height: calc(100vh - 40px);
-        width: 100%;
-        opacity: 0.9;
-    }
-
-    .nav-bar .menu{
-        display: none;
-    }
-
-    .sub-nav .tab {
-        display: block;
-        height: 40px;
-    }
-
-    .sticky {
-        position: fixed;
-        top: 0px;
-        width: 100%;
-        z-index: 1;
-    }
-
-    .sticky.sub-nav {
-        position: fixed;
-        top: 40px;
-    }
-}
 
 .nav-bar a:link {
     color: lightgray;
@@ -178,19 +41,4 @@
 
 .nav-bar a:active {
     color: lightgray;
-}
-
-.sub-nav a:link {
-    color: white;
-    text-decoration: none;
-}
-
-.sub-nav a:visited {
-    color: white;
-    text-decoration: none;
-}
-
-.sub-nav a:active {
-    color: white;
-    text-decoration: none;
 }

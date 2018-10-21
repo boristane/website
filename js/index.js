@@ -58,7 +58,7 @@ function snakeGame(container) {
     canvas.style.padding = `${padding}px`;
     canvas.style.width = '100%';
     canvas.style.maxWidth = `${canvas.width}px`;
-    canvas.style.borderBottom = 'dashed 1px #FE8566';
+    canvas.style.border = 'dashed 1px #FE8566';
     canvas.style.borderRight = 'dashed 1px #FE8566';
     const ctx = canvas.getContext('2d');
 
@@ -181,62 +181,76 @@ function snakeGame(container) {
     requestAnimationFrame(loop);
 }
 
-function navBar() {
-    function stickyNav() {
-        const stickyHeightThreshold = $('.nav-bar').offsetTop;
-        const topContainer = $s('.content-container')[0];
-        if (window.pageYOffset >= stickyHeightThreshold + 1) {
-            $('.nav-bar').classList.add('sticky');
-            $('.sub-nav').classList.add('sticky');
-            topContainer.style.marginTop = stickyHeightThreshold;
-        } else {
-            $('.nav-bar').classList.remove('sticky');
-            $('.sub-nav').classList.remove('sticky');
-            topContainer.style.marginTop = 0;
-        }
+function links(container, labels, urls) {
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    container.appendChild(svg);
+    svg.setAttribute('width', container.clientWidth);
+    svg.setAttribute('height', container.clientHeight);
+
+    // styling
+    svg.style.position = 'absolute';
+    svg.style.top = '0';
+    svg.style.left = '0';
+    svg.style.width = '100%';
+
+    function randomInt(min, max) {
+        return parseInt(Math.random() * (max - min) + min, 10);
     }
 
-    function openDrawerMenu() {
-        const x = $('.sub-nav');
-        if (x.classList.contains('responsive')) {
-            x.classList.remove('responsive');
-            $('.icon').classList.remove('highlighted');
-            $('.menu').classList.remove('highlighted');
-            $('html').classList.remove('no-scroll');
-        } else {
-            x.classList.add('responsive');
-            $('.icon').classList.add('highlighted');
-            $('.menu').classList.add('highlighted');
-            $('html').classList.add('no-scroll');
-        }
+    function randomColor() {
+        const colors = ['#40ADA3', '#FE8566', '#D68A59', '#7851A9', '#F75394', '#FFAE42', '#EFDECD', '#A2A2D0', '#EA7E5D', '#FFBCD9', '#F0E891', '#FEFE22', '#FF8243', '#BAB86C'];
+        const index = randomInt(0, colors.length - 1);
+        return colors[index];
     }
 
-    $s('.sub-nav .tab').forEach((tab, index) => {
-        tab.addEventListener('mouseover', () => {
-            $s('.sub-nav .underlined')[index].style.opacity = 1;
-        });
-        tab.addEventListener('mouseout', () => {
-            $s('.sub-nav .underlined')[index].style.opacity = 0;
-        });
-    });
-
-    $('.menu').addEventListener('mouseover', () => {
-        $('.nav-bar .underlined').style.opacity = 1;
-    });
-
-    $('.menu').addEventListener('mouseout', () => {
-        $('.nav-bar .underlined').style.opacity = 0;
-    });
-
-    $('.icon').addEventListener('click', openDrawerMenu);
-    $('.menu').addEventListener('click', openDrawerMenu);
-
-    window.addEventListener('scroll', stickyNav);
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && $('.sub-nav').classList.contains('responsive')) {
-            openDrawerMenu();
+    const coords = [];
+    function getCoords(others) {
+        let r = container.clientWidth / randomInt(9, 12);
+        let cx = randomInt(r, container.clientWidth - r);
+        let cy = randomInt(r, container.clientHeight - r);
+        if (cy <= container.clientHeight / 2
+            && cy >= container.clientHeight / 6
+            && cx <= container.clientWidth / 1.2) {
+            ({ cx, cy, r } = getCoords(others));
         }
+        others.forEach((coord) => {
+            if (((coord.cx - cx) ** 2) + ((coord.cy - cy) ** 2) < r ** 2) {
+                ({ cx, cy, r } = getCoords(others));
+            }
+        });
+        return { cx, cy, r };
+    }
+
+    labels.forEach((label, index) => {
+        const { cx, cy, r } = getCoords(coords);
+        coords.push({ cx, cy, r });
+
+        const color = randomColor();
+
+        const a = document.createElementNS(ns, 'a');
+        a.setAttribute('href', urls[index]);
+        a.setAttribute('target', '_blank');
+
+        const circle = document.createElementNS(ns, 'circle');
+        circle.setAttribute('cx', cx);
+        circle.setAttribute('cy', cy);
+        circle.setAttribute('r', r);
+        circle.setAttribute('fill', color);
+        circle.setAttribute('opacity', 0.25);
+
+        const text = document.createElementNS(ns, 'text');
+        text.setAttribute('x', cx);
+        text.setAttribute('y', cy + r / 8);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('font-size', r / 2.5);
+        text.classList.add('details');
+        text.innerHTML = label;
+
+
+        a.appendChild(circle);
+        a.appendChild(text);
+        svg.appendChild(a);
     });
 }
 
@@ -256,6 +270,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     hello();
-    navBar();
     snakeGame($('.content-container.right'));
+    const labels = ['Blog', 'Lab', 'Portfolio'];
+    const urls = ['./views/blog.html', './views/lab.html', './views/portfolio.html'];
+    links($('.content-container.left'), labels, urls);
 });
