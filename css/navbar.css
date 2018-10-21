@@ -11,25 +11,17 @@
 }
 
 .nav-bar .social:hover {
-    background-color: #FE8566;
+    background-color: grey;
     color: white;
 }
 
 .nav-bar {
-    position: fixed;
+    position: absolute;
     bottom: 0px;
     overflow: hidden;
     background: white;
-    width: 50%;
+    width: 100%;
 }
-
-
-@media (max-width: 1024px) {
-    .nav-bar {
-        width: 100%;
-    }
-}
-
 
 .nav-bar a:link {
     color: lightgray;

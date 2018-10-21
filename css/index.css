@@ -1,29 +1,20 @@
 html, body {
     margin: 0;
     padding: 0;
+    height: 100vh;
+    overflow: hidden;
 }
+
 
 .content-container {
-    position: absolute;
     box-sizing: border-box;
-}
-
-.left {
-    width: 50%;
-    left: 0;
+    width: 100%;
     background-color: #ffffff;
-    padding: calc(100vh / 6) 6% 20px 6%;
+    padding: 150px 20% 20px 20%;
     height: calc(100vh - 41px);
-    padding-top: 150px;
-}
-
-.right {
-    width: 50%;
-    right: 0;
-    padding: 20px 2% 20px 2%;
-    height: 100vh;
-    min-height: 640px;
-    border-left: 1px solid #FE8566;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
 }
 
 #hello {
@@ -59,34 +50,34 @@ html, body {
     width: 100%;
     fill: grey;
     cursor: pointer;
+    margin: 50px;
+    font-size: 1.4em;
+    font-weight: 300;
 }
 
-@media (max-width: 1400px) and (min-width: 1024px) {
-    .content-container {
-        padding: 20px 2% 20px 2%;
-    }
+.details a:link {
+    color: grey;
+    text-decoration: none;
+}
 
-    #hello {
-        font-size: 6.5em;
-        line-height: 1.0;
-    }
+.details a:visited {
+    color: grey;
+    text-decoration: none;
+}
 
-    .intro {
-        margin-left: 39px;
-        margin-top: -30px;
-        font-size: 1.5em;
-    }
+.details a:active {
+    color: grey;
+    text-decoration: none;
+}
 
-    .left {
-        padding-top: calc(100vh / 6);
-    }
+.details a:hover {
+    color: white;
+    background-color: grey;
+    text-decoration: none;
+    padding: 15px;
 }
 
 @media (max-width: 1023px) and (min-width: 768px) {
-    .content-container {
-        padding: 20px 6% 20px 6%;
-    }
-
     #hello {
         font-size: 6.4em;
         line-height: 1.0;
@@ -98,21 +89,18 @@ html, body {
         font-size: 1.5em;
     }
 
-    .left {
-        width: 100%;
-        padding-top: calc(100vh / 6);
+    .details {
+        margin-left: 39px;
+        margin-top: 30px;
+        font-size: 1.1em;
     }
 
-    .right {
-        display: none;
+    .content-container {
+        padding: 150px 10% 20px 10%;
     }
 }
 
 @media (max-width: 767px) {
-    .content-container {
-        padding: 20px 4% 20px 4%;
-    }
-
     #hello {
         font-size: 4.2em;
         line-height: 1.0;
@@ -124,12 +112,13 @@ html, body {
         font-size: 1.1em;
     }
 
-    .left {
-        width: 100%;
-        padding-top: calc(100vh / 6);
+    .details {
+        margin-left: 25px;
+        margin-top: 20px;
+        font-size: 1.0em;
     }
 
-    .right {
-        display: none;
+    .content-container {
+        padding: 100px 5% 20px 5%;
     }
 }
