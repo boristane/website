@@ -206,16 +206,16 @@ function links(container, labels, urls) {
 
     const coords = [];
     function getCoords(others) {
-        let r = container.clientWidth / randomInt(9, 12);
-        let cx = randomInt(r, container.clientWidth - r);
-        let cy = randomInt(r, container.clientHeight - r);
+        let r = container.clientWidth / randomInt(5, 12);
+        let cx = randomInt(r * 1.2, container.clientWidth - (r * 1.2));
+        let cy = randomInt(r * 1.2, container.clientHeight - (r * 1.2));
         if (cy <= container.clientHeight / 2
-            && cy >= container.clientHeight / 6
+            && cy >= container.clientHeight / 8
             && cx <= container.clientWidth / 1.2) {
             ({ cx, cy, r } = getCoords(others));
         }
         others.forEach((coord) => {
-            if (((coord.cx - cx) ** 2) + ((coord.cy - cy) ** 2) < r ** 2) {
+            if (((coord.cx - cx) ** 2) + ((coord.cy - cy) ** 2) < (1.6 * r) ** 2) {
                 ({ cx, cy, r } = getCoords(others));
             }
         });
@@ -237,7 +237,10 @@ function links(container, labels, urls) {
         circle.setAttribute('cy', cy);
         circle.setAttribute('r', r);
         circle.setAttribute('fill', color);
-        circle.setAttribute('opacity', 0.25);
+        circle.setAttribute('stroke', color);
+        circle.setAttribute('stroke-opacity', 0.5);
+        circle.setAttribute('stroke-width', r / 5);
+        circle.setAttribute('fill-opacity', 0.25);
 
         const text = document.createElementNS(ns, 'text');
         text.setAttribute('x', cx);
@@ -274,4 +277,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const labels = ['Blog', 'Lab', 'Portfolio'];
     const urls = ['./views/blog.html', './views/lab.html', './views/portfolio.html'];
     links($('.content-container.left'), labels, urls);
+
+    function drawSVG() {
+        $('.content-container.left').removeChild($('svg'));
+        links($('.content-container.left'), labels, urls);
+    }
+
+    $('.content-container.left').addEventListener('click', drawSVG);
+    let resizeId;
+
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeId);
+        resizeId = setTimeout(drawSVG, 500);
+    });
 });
