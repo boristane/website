@@ -1,0 +1,119 @@
+body {
+    height: auto !important;
+}
+
+.projects-container {
+    max-width: 900px;
+    margin: 100px auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.project {
+    margin: 30px 0;
+}
+
+.project .img-container {
+    padding: 10px 50px;
+    border-right: 1px solid lightgray;
+    transition: border 0.2s ease-in-out;
+}
+
+.project .img-container img {
+    max-width: 300px;
+}
+
+.project .img-container:hover {
+    border-color: rgb(250, 90, 95);
+    cursor: pointer;
+}
+
+.project .info {
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+.project .description {
+    padding: 0 50px;
+    font-weight: 300;
+}
+
+.demo {
+    text-align: right;
+}
+
+.home a:link,
+.description a:link {
+    color: rgb(250, 90, 95);
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+    border-bottom: 2px solid transparent;
+}
+
+.home a:visited,
+.description a:visited {
+    color: rgb(250, 90, 95);
+}
+
+.home a:active,
+.description a:active {
+    color: rgb(250, 90, 95);
+}
+
+.home a:hover,
+.description a:hover {
+    border-color: rgb(250, 90, 95);
+}
+
+.stack {
+    font-style: italic;
+    font-weight: 400;
+    margin-top: 40px;
+    margin-bottom: 10px;
+}
+
+.title {
+    text-decoration: black;
+    color: rgb(250, 90, 95);
+    transition: all 0.2s ease-in-out;
+    border-bottom: 5px solid transparent;
+}
+
+.title:visited {
+    color: rgb(250, 90, 95);
+}
+
+.active:visited {
+    color: rgb(250, 90, 95);
+}
+
+.title:hover {
+    color: rgb(250, 90, 95);
+    border-color: rgb(250, 90, 95);
+}
+
+@media (max-width: 900px) {
+    .projects-container {
+        max-width: 400px;
+        margin: auto;
+        margin-top: 50px;
+    }
+    .project {
+        border-bottom: 2px solid rgb(250, 90, 95);
+    }
+    h1 {
+        text-align: center;
+    }
+    .project .info {
+        display: block;
+    }
+    .project .img-container img {
+        max-width: 200px;
+    }
+    .project .img-container {
+        text-align: center;
+        border: none;
+    }
+    .project .description {
+        padding: 10px;
+    }
+}

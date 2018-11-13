@@ -1,22 +1,23 @@
 
 .nav-bar .social{
+    box-sizing: border-box;
     border-left: 1px solid lightgray;
     border-top: 1px solid lightgray;
-    height: 30px;
+    height: 40px;
     width: 40px;
     float: right;
     text-align: center;
-    font-size: 1.1em;
-    padding-top: 10px;
+    font-size: 15px;
+    padding-top: 12px;
 }
 
 .nav-bar .social:hover {
-    background-color: grey;
+    background-color: rgb(250, 90, 95);
     color: white;
 }
 
 .nav-bar {
-    position: absolute;
+    position: fixed;
     bottom: 0px;
     overflow: hidden;
     background: white;
