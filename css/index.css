@@ -96,7 +96,7 @@
     #hello {
         font-size: 4.2em;
         line-height: 1.0;
-        width: 200px;
+        width: 100%;
     }
 
     .intro {
