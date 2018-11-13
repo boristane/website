@@ -1,16 +1,9 @@
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-}
-
 
 .content-container {
     box-sizing: border-box;
     width: 100%;
     background-color: #ffffff;
     padding: 20vh 20% 20px 20%;
-    height: calc(100vh - 41px);
     -webkit-user-select: none;
     -moz-user-select: none;
     user-select: none;
@@ -25,6 +18,7 @@ html, body {
     color: #eaeaea;
     white-space: nowrap;
     overflow: hidden;
+    box-sizing: border-box;
 }
 
 .intro {
@@ -102,6 +96,7 @@ html, body {
     #hello {
         font-size: 4.2em;
         line-height: 1.0;
+        width: 200px;
     }
 
     .intro {

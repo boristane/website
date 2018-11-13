@@ -19,9 +19,9 @@
 .nav-bar {
     position: fixed;
     bottom: 0px;
-    overflow: hidden;
     background: white;
     width: 100%;
+    right: 0;
 }
 
 .nav-bar a:link {
