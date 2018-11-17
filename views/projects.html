@@ -44,8 +44,8 @@
 
                             </div>
                             <div class="stack">Stack: {{ project.stack.join(', ') }}</div>
-                            <div class="demo"><a :href="project.url">Demo >></a></div>
-                            <div class="demo"><a :href="project.github">Github Repo >></a></div>
+                            <div class="demo"><a :href="project.url" v-show="project.url">Demo >></a></div>
+                            <div class="demo"><a :href="project.github" v-show="project.github">Github Repo >></a></div>
                         </div>
                     </div>
                 </div>
