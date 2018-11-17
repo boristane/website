@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../css/navbar.css">
     <link rel="stylesheet" href="../css/projects.css">
     <link rel="icon" href="../img/favicon.ico">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <title>Projects - Boris Tane</title>
 </head>
 <body>
@@ -27,204 +28,30 @@
                 A collection of some of my recent <strong>non-confidential</strong> projects, some polished, some draft, in no particular order...
             </div>
 
-            <div class="project">
-                <h1>
-                    <a href="https://boristane.github.io/queend/" class="title">queend</a>
-                </h1>
-                <div class="info">
-                    <a href="https://boristane.github.io/queend/">
-                        <div class="img-container">
-                            <img src="../img/projects/queend.png" alt="queend" srcset="">
+            <div id="app">
+                <div class="project" v-for="project in projects">
+                    <h1>
+                        <a :href="project.url" class="title">{{ project.title }}</a>
+                    </h1>
+                    <div class="info">
+                        <a :href="project.url">
+                            <div class="img-container">
+                                <img :src="project.image" :alt="project.title" srcset="">
+                            </div>
+                        </a>
+                        <div class="description">
+                            <div v-html="project.description">
+
+                            </div>
+                            <div class="stack">Stack: {{ project.stack.join(', ') }}</div>
+                            <div class="demo"><a :href="project.url" v-show="project.url">Demo >></a></div>
+                            <div class="demo"><a :href="project.github" v-show="project.github">Github Repo >></a></div>
                         </div>
-                    </a>
-                    <div class="description">
-                        <p>
-                            This project originates from my interest in meteorological data. I figured I could get the wind data at meteorological stations across Britain from the <a href="https://www.metoffice.gov.uk/datapoint">Met Office</a> and display it on a map.
-                        </p>
-                        <p>
-                            As I am using a flat map (just an image), I had to use a cartesian coordinate system, whilst the raw data was provided in lat/lon coordinates. I used the <a href="https://github.com/chrisveness/geodesy">geodesy</a> library to do the conversion to the <a href="https://www.ordnancesurvey.co.uk/resources/maps-and-geographic-resources/the-national-grid.html">National Grid</a> system et voila !
-                        </p>
-                        <p>
-                            I later decided to perform interpolation of the wind data rather than display individual met stations. My research led me to <a href="https://en.wikipedia.org/wiki/Kriging">Kriging Interpolation</a> and the <a href="http://oeo4b.github.io/">kriging.js</a> library.
-                        </p>
-                        <p>
-                            The final step was serving the data from a web-server as the raw data is provided through the http protocol and <a href="https://pages.github.com/">GitHub Pages</a> where the project is hosted does not allow reading data from insecure endpoints.
-                        </p>
-                        <div class="stack">Stack: Javascript, Node.js, Express.js</div>
-                        <div class="demo"><a href="https://boristane.github.io/queend/">Demo >></a></div>
-                        <div class="demo"><a href="https://github.com/boristane/queend">Github Repo >></a></div>
                     </div>
                 </div>
             </div>
-
-            <div class="project">
-                <h1>
-                    <a href="https://boristane.github.io/collate-at/#/home" class="title">coll@te</a>
-                </h1>
-                <div class="info">
-                    <a href="https://boristane.github.io/collate-at/#/home">
-                        <div class="img-container">
-                            <img src="../img/projects/collate-logo.png" alt="coll@te" srcset="">
-                        </div>
-                    </a>
-                    <div class="description">
-                        <p>
-                            This project is the first prototype for a winning solution that was developed for the <a href="https://www.btng.tech/">BTNG</a> Hackathon.
-                        </p>
-                        <p>
-                            This <a href="https://blog.boristane.com/#/article/i_went_to_the_btng_hackathon">blog post</a> goes through the process in more detail.
-                        </p>
-                        <div class="stack">Stack: Javascript, Vue.js, D3.js</div>
-                        <div class="demo"><a href="https://boristane.github.io/collate-at/#/home">Demo >></a></div>
-                        <div class="demo"><a href="https://github.com/boristane/collate-at">Github Repo >></a></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="project">
-                <h1>
-                    <a href="https://github.com/boristane/blog-api" class="title">blog-api</a>
-                </h1>
-                <div class="info">
-                    <a href="https://github.com/boristane/blog-api">
-                        <div class="img-container">
-                            <img src="../img/projects/blog-api.png" alt="blog-api" srcset="">
-                        </div>
-                    </a>
-                    <div class="description">
-                        <p>
-                            The RESTFul API that powers my <a href="https://blog.boristane.com/#/">blog</a> and my <a href="https://art.boristane.com/#/">procedural art portfolio</a>.
-                        </p>
-                        <p>
-                            The API is written in <a href="https://nodejs.org/en/">Node.js</a> with <a href="https://expressjs.com/">Express.js</a>, hosted on <a href="https://www.heroku.com/nodejs">Heroku</a> and uses <a href="https://aws.amazon.com/s3/?nc2=h_m1">Amazon Web Services S3</a> to store assets (images, markdown files, procedural art scripts, etc...).
-                        </p>
-                        <div class="stack">Stack: Javascript, Node.js, Express.js, MongoDB</div>
-                        <div class="demo"><a href="https://github.com/boristane/blog-api">Github Repo >></a></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="project">
-                <h1>
-                    <a href="https://github.com/joeltankam/checkif.js" class="title">checkif.js</a>
-                </h1>
-                <div class="info">
-                    <a href="https://github.com/joeltankam/checkif.js">
-                        <div class="img-container">
-                            <img src="../img/projects/checkif.png" alt="checkif.js" srcset="">
-                        </div>
-                    </a>
-                    <div class="description">
-                        <p>
-                            A Javascript library my friend <a href="https://github.com/joeltankam">Joël Tankam</a> created where I have been heavily contributing.
-                        </p>
-                        <p>
-                            The library aims to perform various checks in the javascript environment. We follow a <a href="https://en.wikipedia.org/wiki/Test-driven_development">TDD (Test Driven Development)</a> process and have developed a <a href="https://en.wikipedia.org/wiki/Continuous_delivery">CD (Continuous Delivery)</a> pipeline.
-                        </p>
-                        <div class="stack">Stack: Javascript, Jest, Travis CI, Codacy</div>
-                        <div class="demo"><a href="https://github.com/joeltankam/checkif.js">Github Repo >></a></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="project">
-                <h1>
-                    <a href="https://local-weather-boristane.herokuapp.com/" class="title">local-weather</a>
-                </h1>
-                <div class="info">
-                    <a href="https://local-weather-boristane.herokuapp.com/">
-                        <div class="img-container">
-                            <img src="../img/projects/local-weather.png" alt="local-weather" srcset="">
-                        </div>
-                    </a>
-                    <div class="description">
-                        <p>
-                            A minimalistic web-app which gives local meteorolofical data.
-                        </p>
-                        <div class="stack">Stack: Javascript, Node.js, Express.js</div>
-                        <div class="demo"><a href="https://local-weather-boristane.herokuapp.com/">Demo >></a></div>
-                        <div class="demo"><a href="https://github.com/boristane/local-weather">Github Repo >></a></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="project">
-                <h1>
-                    <a href="https://boristane.github.io/javascript30/" class="title">Javascript 30</a>
-                </h1>
-                <div class="info">
-                    <a href="https://boristane.github.io/javascript30/">
-                        <div class="img-container">
-                            <img src="../img/projects/js30.jpg" alt="js30" srcset="">
-                        </div>
-                    </a>
-                    <div class="description">
-                        <p>
-                            This is a <a href="https://wesbos.com/javascript30/">challenge</a> created by <a href="https://wesbos.com/">Web Bos</a>.
-                        </p>
-                        <p>
-                            It states: <span style="font-style: italic;">"Build 30 things in 30 days with vanilla JavaScript; no frameworks, libraries."</span>
-                        </p>
-                        <div class="stack">Stack: Javascript</div>
-                        <div class="demo"><a href="https://boristane.github.io/javascript30/">Demo >></a></div>
-                        <div class="demo"><a href="https://github.com/boristane/javascript30">Github Repo >></a></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="project">
-                <h1>
-                    <a href="https://boristane.github.io/colors/" class="title">colors</a>
-                </h1>
-                <div class="info">
-                    <a href="https://boristane.github.io/colors/">
-                        <div class="img-container">
-                            <img src="../img/projects/colors.png" alt="colors" srcset="">
-                        </div>
-                    </a>
-                    <div class="description">
-                        <p>
-                            I am terrible at chosing colors, so I made this random color generator on steroids.
-                        </p>
-                        <p>
-                            It generates random colors, allows to chose various shades of a given color and performs rgb - hex conversion.
-                        </p>
-                        <div class="stack">Stack: Javascript</div>
-                        <div class="demo"><a href="https://boristane.github.io/colors/">Demo >></a></div>
-                        <div class="demo"><a href="https://github.com/boristane/colors">Github Repo >></a></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="project">
-                <h1>
-                    <a href="https://github.com/boristane/woden" class="title">woden</a>
-                </h1>
-                <div class="info">
-                    <a href="https://github.com/boristane/woden">
-                        <div class="img-container">
-                            <img src="../img/projects/woden.png" alt="woden" srcset="">
-                        </div>
-                    </a>
-                    <div class="description">
-                        <p>
-                            A text-based browser game. The core mechanic of the game is that the player decides how much time NPCs get to live depending on their past and probable future actions.
-                        </p>
-                        <p>
-                            Coming from a C# background, I used the "class" syntactic sugar in Javascript which I ultimately do not like.
-                        </p>
-                        <p>
-                            Well into development, this game proved to be rather boring to play.
-                        </p>
-                        <div class="stack">Stack: Javascript</div>
-                        <div class="demo"><a href="https://github.com/boristane/woden">Github Repo >></a></div>
-                    </div>
-                </div>
-            </div>
-
-
 
         </div>
-
+    <script src="../js/projects.js" ></script>
 </body>
 </html>

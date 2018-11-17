@@ -16,6 +16,7 @@ body {
     padding: 10px 50px;
     border-right: 1px solid lightgray;
     transition: border 0.2s ease-in-out;
+    min-height: 300px;
 }
 
 .project .img-container img {
@@ -112,6 +113,7 @@ body {
     .project .img-container {
         text-align: center;
         border: none;
+        min-height: 0px;
     }
     .project .description {
         padding: 10px;
