@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" integrity="sha256-2YQRJMXD7pIAPHiXr0s+vlRWA7GYJEK0ARns7k2sbHY=" crossorigin="anonymous" />
+    <title>Post Art Piece</title>
+    <script src="../js/postFunction.js"></script>
+</head>
+<body>
+    <div style="width: 900px; margin: 60px auto;">
+        <h1 class="title">Art Piece</h1>
+        <form>
+
+            <div class="row" style="margin-bottom: 20px;">
+                <div class="six columns">
+                    <label for="title">Title</label>
+                    <input class="u-full-width" type="text" placeholder="Title" name="title" id="title" required>
+                    <label for="inspiration">Inspiration</label>
+                    <input class="u-full-width" type="text" placeholder="Inspiration" name="inspiration" id="inspiration">
+                    <label for="lang">Language</label>
+                    <input class="u-full-width" type="text" placeholder="Language" name="lang" id="lang">
+                    <label for="js">JS</label>
+                    <input class="u-full-width" type="file" placeholder="JS" name="js" id="js" accept="application/javascript" required>
+                    <label for="image">Image</label>
+                    <input class="u-full-width" type="file" placeholder="Image" name="image" id="image" accept="image/png" required>
+                </div>
+                <div class="six columns">
+                    <label for="author">Author</label>
+                    <input class="u-full-width" type="text" placeholder="Author" name="author" id="author">
+                    <label for="ref">Ref</label>
+                    <input class="u-full-width" type="text" placeholder="Ref" name="ref" id="ref">
+                    <label for="url">URL</label>
+                    <input class="u-full-width" type="text" placeholder="URL" name="url" id="url">
+                    <label for="text">Text</label>
+                    <textarea class="u-full-width" placeholder="Text" id="text" name="text" style="max-width: 100%;"></textarea>
+                </div>
+            </div>
+            <input class="button-primary" type="submit" value="Submit">
+        </form>
+        <p id="message"></p>
+    </div>
+    <script src="../js/postArt.js"></script>
+</body>
+</html>

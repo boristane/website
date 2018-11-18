@@ -14,11 +14,15 @@ function postData(url = '', data = {}) {
         .then(response => response.json());
 }
 
+const token = JSON.parse(localStorage.getItem('token')) || '';
+if (token) {
+    document.querySelector('.routes').style.display = 'block';
+}
+
 const form = document.querySelector('form');
 const url = 'https://boristane-blog-api.herokuapp.com/users/login';
 form.addEventListener('submit', (e) => {
     e.preventDefault();
-    document.getElementById('auth').style.display = 'none';
     localStorage.setItem('token', JSON.stringify({}));
     const email = e.target.email.value;
     const password = e.target.psw.value;
@@ -26,10 +30,12 @@ form.addEventListener('submit', (e) => {
         email,
         password,
     }).then((data) => {
+        document.getElementById('auth').textContent = data.message;
         if (!data.token) {
-            document.getElementById('auth').style.display = 'block';
+            document.querySelector('.routes').style.display = 'none';
             return;
         }
         localStorage.setItem('token', JSON.stringify(data.token));
+        document.querySelector('.routes').style.display = 'block';
     });
 });
