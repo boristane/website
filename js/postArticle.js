@@ -1,5 +1,5 @@
 const token = JSON.parse(localStorage.getItem('token')) || '';
-const url = 'http://127.0.0.1:3000/articles/';
+const url = 'https://boristane-blog-api.herokuapp.com/articles/';
 const form = document.querySelector('form');
 form.addEventListener('submit', (e) => {
     e.preventDefault();
