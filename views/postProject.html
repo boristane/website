@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" integrity="sha256-2YQRJMXD7pIAPHiXr0s+vlRWA7GYJEK0ARns7k2sbHY=" crossorigin="anonymous" />
+    <title>Post Article</title>
+    <script src="../js/postFunction.js"></script>
+</head>
+<body>
+    <div style="width: 900px; margin: 60px auto;">
+        <h1 class="title">Project</h1>
+        <form>
+
+            <div class="row">
+            <div class="six columns">
+                <label for="title">Title</label>
+                <input class="u-full-width" type="text" placeholder="Title" name="title" id="title" required>
+                <label for="url">URL</label>
+                <input class="u-full-width" type="text" placeholder="URL" name="url" id="url" required>
+                <label for="github">Github</label>
+                <input class="u-full-width" type="text" placeholder="Github" name="github" id="github" required>
+            </div>
+            <div class="six columns">
+                <label for="stack">Stack</label>
+                <input class="u-full-width" type="text" placeholder="Stack" name="stack" id="stack">
+                <label for="image">Image</label>
+                <input class="u-full-width" type="file" placeholder="Image" name="image" id="image" accept="image/png" required>
+            </div>
+            </div>
+            <label for="description">Description</label>
+            <textarea class="u-full-width" placeholder="Description" id="description" name="description"></textarea>
+            <input class="button-primary" type="submit" value="Submit">
+        </form>
+        <p id="message"></p>
+    </div>
+    <script src="../js/postProject.js"></script>
+</body>
+</html>
