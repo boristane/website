@@ -9,7 +9,9 @@ const app = new Vue({
         const url = 'https://boristane-blog-api.herokuapp.com/projects';
         fetch(url).then(res => res.json())
             .then((data) => {
-                this.projects = data.projects;
+                this.projects = data.projects.sort((a, b) => {
+                  return Date(b.createdAt) < Date(a.createdAt) ? -1 : 1;
+                });
             });
     },
 });
