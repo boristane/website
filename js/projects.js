@@ -3,7 +3,7 @@
 const app = new Vue({
     el: '#app',
     data: {
-        projects: '',
+        projects: undefined,
     },
     created: function () {
         const url = 'https://boristane-blog-api.herokuapp.com/projects';

@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/navbar.css">
     <link rel="stylesheet" href="../css/projects.css">
+    <link rel="stylesheet" href="../css/loader.css">
     <link rel="icon" href="../img/favicon.ico">
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <title>Projects - Boris Tane</title>
@@ -29,6 +30,7 @@
             </div>
 
             <div id="app">
+                <div class="loader" v-show="!projects"></div>
                 <div class="project" v-for="project in projects">
                     <h1>
                         <a :href="project.url" class="title">{{ project.title }}</a>
