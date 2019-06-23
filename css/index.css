@@ -1,4 +1,3 @@
-
 .content-container {
     box-sizing: border-box;
     width: 100%;
@@ -13,7 +12,7 @@
     font-size: 7.2em;
     line-height: 1.25;
     margin: 0;
-    font-family: 'Times New Roman', Times, serif;
+    font-family: "Times New Roman", Times, serif;
     font-weight: 300;
     color: #eaeaea;
     white-space: nowrap;
@@ -22,7 +21,7 @@
 }
 
 .intro {
-    font-family: 'Times New Roman', Times, serif;
+    font-family: "Times New Roman", Times, serif;
     margin-left: 50px;
     margin-top: -50px;
     font-size: 1.8em;
@@ -39,7 +38,7 @@
 }
 
 .details {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     width: 100%;
     cursor: pointer;
     margin: 50px;
@@ -50,6 +49,7 @@
 .details a:link {
     color: grey;
     text-decoration: none;
+    transition: all 0.2s ease-in-out;
 }
 
 .details a:visited {
@@ -72,7 +72,7 @@
 @media (max-width: 1023px) and (min-width: 768px) {
     #hello {
         font-size: 6.4em;
-        line-height: 1.0;
+        line-height: 1;
     }
 
     .intro {
@@ -95,7 +95,7 @@
 @media (max-width: 767px) {
     #hello {
         font-size: 4.2em;
-        line-height: 1.0;
+        line-height: 1;
         width: 100%;
     }
 
@@ -108,7 +108,7 @@
     .details {
         margin-left: 25px;
         margin-top: 20px;
-        font-size: 1.0em;
+        font-size: 1em;
     }
 
     .content-container {

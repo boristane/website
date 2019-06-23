@@ -1,17 +1,16 @@
 /* eslint-disable func-names */
 /* eslint-disable object-shorthand */
 const app = new Vue({
-    el: '#app',
+    el: "#app",
     data: {
-        projects: undefined,
+        projects: undefined
     },
-    created: function () {
-        const url = 'https://boristane-blog-api.herokuapp.com/projects';
-        fetch(url).then(res => res.json())
-            .then((data) => {
-                this.projects = data.projects.sort((a, b) => {
-                  return Date(b.createdAt) < Date(a.createdAt) ? -1 : 1;
-                });
+    created: function() {
+        const url = "https://boristane-blog-api.herokuapp.com/projects";
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                this.projects = data.projects.reverse();
             });
-    },
+    }
 });
