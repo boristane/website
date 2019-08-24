@@ -12,6 +12,8 @@ body {
 
 .project {
     margin: 0;
+    border-bottom: 2px solid rgb(250, 90, 95);
+    padding: 50px 0px;
 }
 
 h1 {
@@ -26,8 +28,7 @@ h1 {
 }
 
 .project .img-container {
-    padding: 50px 50px;
-    border-right: 2px solid lightgray;
+    padding: 0px 50px 50px 50px;
     transition: border 0.5s ease-in-out;
     min-height: 320px;
     width: 300px;
@@ -113,9 +114,6 @@ h1 {
         margin: auto;
         margin-top: 50px;
         margin-bottom: 50px;
-    }
-    .project {
-        border-bottom: 2px solid rgb(250, 90, 95);
     }
     h1 {
         text-align: center;

@@ -1,37 +1,25 @@
-
-.nav-bar .social{
-    box-sizing: border-box;
-    border-left: 1px solid lightgray;
-    border-top: 1px solid lightgray;
-    height: 40px;
-    width: 40px;
-    float: right;
+.footer {
     text-align: center;
-    font-size: 15px;
-    padding-top: 12px;
-}
-
-.nav-bar .social:hover {
-    background-color: rgb(250, 90, 95);
-    color: white;
-}
-
-.nav-bar {
+    margin: 50px auto 0px;
+    font-weight: 400;
     position: fixed;
-    bottom: 0px;
-    background: white;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    right: 0;
+    background: white;
 }
-
-.nav-bar a:link {
-    color: lightgray;
+.links a:link {
+    padding: 5px;
+    color: lightgrey;
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
 }
-
-.nav-bar a:visited {
-    color: lightgray;
+.links a:visited {
+    color: lightgrey;
 }
-
-.nav-bar a:active {
-    color: lightgray;
+.links a:active {
+    color: lightgrey;
+}
+.links a:hover {
+    color: rgb(253, 101, 101);
 }
