@@ -6,7 +6,7 @@ const app = new Vue({
         projects: undefined
     },
     created: function() {
-        const url = "https://boristane-blog-api.herokuapp.com/projects";
+        const url = "https://glddw4ljnl.execute-api.eu-west-2.amazonaws.com/prod/projects";
         fetch(url)
             .then(res => res.json())
             .then(data => {
