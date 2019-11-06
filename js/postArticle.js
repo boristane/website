@@ -1,5 +1,5 @@
 const token = JSON.parse(localStorage.getItem('token')) || '';
-const url = 'https://boristane-blog-api.herokuapp.com/articles/';
+const url = 'https://glddw4ljnl.execute-api.eu-west-2.amazonaws.com/prod/articles/';
 const form = document.querySelector('form');
 form.addEventListener('submit', (e) => {
     e.preventDefault();

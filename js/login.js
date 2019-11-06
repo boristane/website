@@ -19,7 +19,7 @@ if (token) {
 }
 
 const form = document.querySelector('form');
-const url = 'https://boristane-blog-api.herokuapp.com/users/login';
+const url = 'https://glddw4ljnl.execute-api.eu-west-2.amazonaws.com/prod/users/login';
 form.addEventListener('submit', (e) => {
     e.preventDefault();
     document.getElementById('auth').textContent = 'Logging in, please wait...';
