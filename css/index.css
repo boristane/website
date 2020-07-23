@@ -1,5 +1,5 @@
-@import url("https://fonts.googleapis.com/css?family=Montserrat&display=swap");
 @import url("https://fonts.googleapis.com/css?family=Neucha&display=swap");
+@import url("https://fonts.googleapis.com/css?family=Raleway&display=swap");
 
 .content-container {
     box-sizing: border-box;
@@ -24,12 +24,12 @@
 }
 
 .intro {
-    font-family: "Neucha", cursive;
+    font-family: 'Raleway', sans-serif;
     margin-left: 50px;
     margin-top: -50px;
     font-size: 1.8em;
-    width: 100%;
-    max-width: 17em;
+    width: calc(100% - 50px);
+    max-width: 22em;
 }
 
 #name {
@@ -41,7 +41,7 @@
 }
 
 .details {
-    font-family: "Neucha", cursive;
+    font-family: 'Raleway', sans-serif;
     width: 100%;
     cursor: pointer;
     margin: 50px;
@@ -80,12 +80,14 @@
         margin-left: 39px;
         margin-top: -30px;
         font-size: 1.5em;
+        width: calc(100% - 39px);
     }
 
     .details {
         margin-left: 39px;
         margin-top: 30px;
         font-size: 1.1em;
+        width: calc(100% - 39px);
     }
 
     .content-container {
@@ -104,12 +106,14 @@
         margin-left: 25px;
         margin-top: -20px;
         font-size: 1.1em;
+        width: calc(100% - 25px);
     }
 
     .details {
         margin-left: 25px;
         margin-top: 20px;
         font-size: 1em;
+        width: calc(100% - 25px);
     }
 
     .content-container {

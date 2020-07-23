@@ -10,6 +10,7 @@ const app = new Vue({
         fetch(url)
             .then(res => res.json())
             .then(data => {
+                console.log(data.projects)
                 this.projects = data.projects.reverse();
             });
     }
