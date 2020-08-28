@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     hello();
 
-    const strings = ["blog", "stuff", "!feature"];
+    const strings = ["blog", "stuff", "!feature", "Twitter"];
     const links = document.querySelectorAll(".details a");
     links.forEach((link, index) => {
         link.textContent = strings[index];

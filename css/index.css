@@ -43,25 +43,26 @@
 .details {
     font-family: 'Raleway', sans-serif;
     width: 100%;
-    cursor: pointer;
     margin: 50px;
     font-size: 1.4em;
     font-weight: 300;
+    color: grey;
+
 }
 
 .details a:link {
-    color: grey;
+    color: black;
     text-decoration: none;
     transition: all 0.2s ease-in-out;
 }
 
 .details a:visited {
-    color: grey;
+    color: black;
     text-decoration: none;
 }
 
 .details a:active {
-    color: grey;
+    color: black;
     text-decoration: none;
 }
 
