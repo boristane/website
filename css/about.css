@@ -48,12 +48,18 @@ h2 {
 }
 
 @media (max-width: 1023px) and (min-width: 768px) {
+  #hello {
+    padding-top: 15px;
+  }
   .content-container {
       padding: 20vh 30px 20px 30px;
   }
 }
 
 @media (max-width: 767px) {
+  #hello {
+    padding-top: 15px;
+  }
   .content-container {
       padding: 5vh 15px 20px 15px;
   }
