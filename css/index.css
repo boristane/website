@@ -6,9 +6,6 @@
     width: 100%;
     background-color: #ffffff;
     padding: 20vh 20% 20px 20%;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    user-select: none;
 }
 
 #hello {
@@ -47,7 +44,6 @@
     font-size: 1.4em;
     font-weight: 300;
     color: grey;
-
 }
 
 .details a:link {
