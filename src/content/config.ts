@@ -3,7 +3,6 @@ import { defineCollection, z } from 'astro:content'
 const postsSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
-  duration: z.string().optional(),
   image: z
     .object({
       src: z.string(),
@@ -20,9 +19,8 @@ const postsSchema = z.object({
     })),
   draft: z.boolean().optional().default(false),
   lang: z.string().optional().default('en-GB'),
+  location: z.string().optional(),
   redirect: z.string().optional(),
-  video: z.boolean().optional(),
-  recording: z.boolean().optional(),
 })
 
 const pages = defineCollection({
