@@ -2,13 +2,14 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { type CollectionPosts } from "../../types";
 import { getAllPosts } from "../../utils/posts";
+import PostCounter from "../../components/PostCounter.vue";
 
 export const prerender = true;
 export async function getStaticPaths() {
   const posts = await getAllPosts();
 
   return posts.map((post) => ({
-    params: { slug: post.slug },
+    params: { slug: (post as any).slug },
     props: {
       post,
     },
@@ -23,8 +24,16 @@ if (post === undefined) {
   return new Response(JSON.stringify(await getAllPosts()));
 }
 
-const { title, image, description } = post.data;
-const { Content } = await post.render();
+const basePath = "https://boristane.com";
+
+// const res = await fetch(`${basePath}/api/views/talk/${(post as any).slug}`, {
+//   method: "GET",
+// });
+
+// const views = ((await res.json()) as any)?.data?.views;
+
+const { title, image, description } = (post as any).data;
+const { Content } = await (post as any).render();
 ---
 
 <BaseLayout
@@ -40,6 +49,12 @@ const { Content } = await post.render();
         {title}
       </h1>
     </header>
+    <PostCounter
+      type={"talk"}
+      slug={post?.slug}
+      count={ 0}
+      client:load
+    />
     <div class="max-w-none prose">
       <Content />
     </div>

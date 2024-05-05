@@ -13,7 +13,7 @@ export default defineConfig({
   adapter: cloudflare({
     platformProxy: {
       enabled: true
-    }
+    },
   }),
   integrations: [
     mdx(),
