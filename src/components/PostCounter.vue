@@ -12,10 +12,6 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  count: {
-    type: Number,
-    required: true,
-  }
 });
 
 const location = useBrowserLocation()
@@ -23,17 +19,15 @@ const views = ref(0);
 const basePath = location.value.origin;
 
 const numViews = computed(() => {
-  return props.count || views.value || 0;
+  return views.value || 0;
 })
 
 onMounted(async () => {
-  if (!props.count) {
-    const res = await fetch(`${basePath}/api/views/talk/${props.slug}`, {
-      method: "GET",
-    });
+  const res = await fetch(`${basePath}/api/views/talk/${props.slug}`, {
+    method: "GET",
+  });
 
-    views.value = ((await res.json()) as any)?.data?.views;
-  }
+  views.value = ((await res.json()) as any)?.data?.views;
 
   const params = new URLSearchParams({
     type: props.type,

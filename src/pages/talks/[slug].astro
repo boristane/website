@@ -24,14 +24,6 @@ if (post === undefined) {
   return new Response(JSON.stringify(await getAllPosts()));
 }
 
-const basePath = "https://boristane.com";
-
-// const res = await fetch(`${basePath}/api/views/talk/${(post as any).slug}`, {
-//   method: "GET",
-// });
-
-// const views = ((await res.json()) as any)?.data?.views;
-
 const { title, image, description } = (post as any).data;
 const { Content } = await (post as any).render();
 ---
@@ -52,7 +44,6 @@ const { Content } = await (post as any).render();
     <PostCounter
       type={"talk"}
       slug={post?.slug}
-      count={ 0}
       client:load
     />
     <div class="max-w-none prose">
