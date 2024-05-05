@@ -12,5 +12,5 @@ const posts = await getPosts('blog')
   pageNav={true}
   pageOperate={true}
 >
-  <ListPosts list={posts} />
+  <ListPosts list={posts as any[]} />
 </BaseLayout>

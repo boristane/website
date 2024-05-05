@@ -1,0 +1,14 @@
+---
+title: "Observability with ClickHouse"
+description: A "behind the scenes" view into building an observability solution with ClickHouse.
+date: "2023-05-25"
+video: true
+---
+
+import BlogYoutubeVideo from '../../components/BlogYoutubeVideo.astro';
+
+When I started [Baselime](https://baselime.io), one of the key shifts I noticed was the emergence of [ClickHouse](https://clickhouse.com) as a database for analytics, and I quickly realised it would be extremely good for high-cardinality and dimentionality data, which are two essential properties of data used for observability. That's why the Baselime data layer is powered by a self-hosted ClickHouse cluster.
+
+When the ClickHouse team invited me to speak at their London meetup, I was so excited to share what we'd learned building an observability platform on top of ClickHouse, for our ingestion pipelines to our database schemas, etc.
+
+<BlogYoutubeVideo embed='00gW8txIP5g'></BlogYoutubeVideo>

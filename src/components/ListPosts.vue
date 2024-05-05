@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-interface Posts {
+interface Post {
   id: string
   slug: string
   body: string
@@ -9,7 +9,7 @@ interface Posts {
 }
 
 withDefaults(defineProps<{
-  list: Posts[]
+  list: Post[]
 }>(), {
   list: () => [],
 })
@@ -18,13 +18,13 @@ function getDate(date: string) {
   return new Date(date).toISOString()
 }
 
-function getHref(posts: Posts) {
-  if (posts.data.redirect)
-    return posts.data.redirect
-  return `/posts/${posts.slug}`
+function getHref(post: Post) {
+  if (post.data.redirect)
+    return post.data.redirect
+  return `/${post.collection}/${post.slug}`
 }
 
-function getTarget(posts: Posts) {
+function getTarget(posts: Post) {
   if (posts.data.redirect)
     return '_blank'
   return '_self'
@@ -60,13 +60,14 @@ function getYear(date: Date | string | number) {
               {{ posts.data.title }}
             </span>
           </div>
+        </div>
+        <div text-xs ws-nowrap flex="~ gap-2 items-center">
           <div text-sm ws-nowrap flex="~ gap-2 items-center">
             <i v-if="posts.data.redirect" text-base i-ri-external-link-line />
             <i v-if="posts.data.recording || posts.data.video" text-base i-ri:film-line />
-            <time :datetime="getDate(posts.data.date)">{{ posts.data.date.split(',')[0] }}</time>
-            <span v-if="posts.data.duration">· {{ posts.data.duration }}</span>
-            <span v-if="posts.data.tag">· {{ posts.data.tag }}</span>
+            <span v-if="posts.data.duration" text-xs>· {{ posts.data.duration }}</span>
           </div>
+          <time :datetime="getDate(posts.data.date)" >{{ posts.data.date }}</time>
         </div>
         <div opacity-80 text-sm>{{ posts.data.description }}</div>
       </a>

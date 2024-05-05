@@ -1,0 +1,16 @@
+---
+title: "Serverless Transactional Outbox Pattern on AWS"
+description: How I implemented a transactional outbox pattern on AWS with serverless services 
+date: "2022-05-17"
+video: true
+---
+
+import BlogYoutubeVideo from '../../components/BlogYoutubeVideo.astro';
+
+I believe this is my first ever public tech talk. The folks at [SST](https://sst.dev/) did the [SST Conf v1](https://v1conf.sst.dev/) for the launch of SST v1 and were kind enough to invite me. It was all remote and it was for me the occasion to connect with a few developers in the serverless community.
+
+My talk was about how I built a [transactional outbox pattern](https://microservices.io/patterns/data/transactional-outbox.html) on AWS with serverless services for [Baselime](https://baselime.io). The main idea of this pattern is to resolve a problem with event driven architectures: **how do you atomically update the database and send events to your message broker?**
+
+My talk starts at [29:53](https://youtu.be/6FzLjpMYcu8?t=1793).
+
+<BlogYoutubeVideo embed='6FzLjpMYcu8'></BlogYoutubeVideo>

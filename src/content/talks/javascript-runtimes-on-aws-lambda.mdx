@@ -1,0 +1,16 @@
+---
+title: "Exploring JavaScript Runtimes on AWS Lambda"
+description: Benchmarking a few JavaScript runtimes on AWS Lambda
+date: "2022-11-22"
+video: true
+---
+
+import BlogYoutubeVideo from '../../components/BlogYoutubeVideo.astro';
+
+[London Node User Group](https://lnug.org/) invited me to give a talk, and that came up when I was wondering if I could squeeze more performance out of my JavaScript [AWS Lambda](https://aws.amazon.com/lambda/) functions without re-writing in Go or Rust.
+
+I then benchmarked [Node.js](https://nodejs.org/en), [Deno](https://deno.com/) and [Bun](https://bun.sh/) on AWS Lambda... The benchmark results themselves are not quite relevant as those runtimes are evolving very quickly; the most interesting part was the journey of deploying unsupported runtimes on AWS Lambda.
+
+This talk is about how to deploy custom runtimes on AWS Lambda, and measure and compare the duration of HTTP requests made to those functions. It's also a great demo of a very early version of [Baselime](https://baselime.io).
+
+<BlogYoutubeVideo embed='Uqknl_aYFUM'></BlogYoutubeVideo>
