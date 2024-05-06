@@ -34,13 +34,16 @@ function toTop() {
 </script>
 
 <template>
-  <div sm:flex="~ flex-row items-start justify-between" w-full font-mono opacity-50 text-main>
+  <div sm:flex="~ flex-row items-start justify-between" w-full font-mono text-main>
     <div>
       <div v-if="showShare" flex="~ gap-2 items-center flex-wrap" mb-2>
         <i i-ri-arrow-right-s-line />
         <span>share on</span>
-        <a v-for="link in shareLinks" :key="link.text" prose-link lh-tight :href="link.href + url">
-          <i v-if="link.icon" text-2.2 :class="link.icon" mr-0.8 />{{ link.text }}
+        <a v-for="link in shareLinks" :key="link.text" prose-link lh-tight flex class="item-center" :href="link.href + url">
+          <i v-if="link.icon"  :class="link.icon" mr-0.8 />
+          <div>
+            {{ link.text }}
+          </div>
         </a>
       </div>
       <div v-if="showBack" flex="~ gap-2 items-center">

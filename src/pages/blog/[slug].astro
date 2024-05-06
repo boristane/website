@@ -1,30 +1,31 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import { type CollectionPosts } from '../../types'
-import { getAllPosts } from '../../utils/posts'
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { type CollectionPosts } from "../../types";
+import { getAllPosts } from "../../utils/posts";
+import PostCounter from "../../components/PostCounter.vue";
 
 export const prerender = true;
 export async function getStaticPaths() {
-  const posts = await getAllPosts()
+  const posts = await getAllPosts();
 
   return posts.map((post) => ({
     params: { slug: post.slug },
     props: {
       post,
     },
-  }))
+  }));
 }
 
 type Props = { post: CollectionPosts }
 
-const { post } = Astro.props
+const { post } = Astro.props;
 
-if(post === undefined) {
-  return new Response(JSON.stringify(await getAllPosts()))
+if (post === undefined) {
+  return new Response(JSON.stringify(await getAllPosts()));
 }
 
-const { title, image, description } = post.data
-const { Content } = await post.render()
+const { title, image, description, date } = post.data;
+const { Content } = await post.render();
 ---
 
 <BaseLayout
@@ -40,6 +41,14 @@ const { Content } = await post.render()
         {title}
       </h1>
     </header>
+    <div class="flex items-center justify-between gap-2 ">
+      <PostCounter
+        type={"blog"}
+        slug={post?.slug}
+        client:load
+      />
+      <div class="text-main text-gray-400">{date}</div>
+    </div>
     <div class="max-w-none prose">
       <Content />
     </div>

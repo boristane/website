@@ -24,7 +24,7 @@ if (post === undefined) {
   return new Response(JSON.stringify(await getAllPosts()));
 }
 
-const { title, image, description } = (post as any).data;
+const { title, image, description, date } = (post as any).data;
 const { Content } = await (post as any).render();
 ---
 
@@ -41,11 +41,14 @@ const { Content } = await (post as any).render();
         {title}
       </h1>
     </header>
-    <PostCounter
-      type={"talk"}
-      slug={post?.slug}
-      client:load
-    />
+    <div class="flex items-center justify-between gap-2 ">
+      <PostCounter
+        type={"talk"}
+        slug={post?.slug}
+        client:load
+      />
+      <div class="text-main text-gray-400">{date}</div>
+    </div>
     <div class="max-w-none prose">
       <Content />
     </div>

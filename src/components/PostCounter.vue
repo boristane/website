@@ -42,7 +42,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div text-main font-mono opacity-50>
+  <div text-main text-gray-400>
     {{ numViews }} view{{ numViews === 1 ? '' : 's' }}
   </div>
 </template>

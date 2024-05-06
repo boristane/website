@@ -14,8 +14,7 @@ export async function GET(context) {
         ...item.data,
         link: `/${item.collection}/${item.slug}/`,
         pubDate: new Date(item.data.date),
-        content: item.body,
-        author: `${siteConfig.author} <${siteConfig.email}>`,
+        author: `${siteConfig.author}`,
       }
     }),
   })

@@ -42,32 +42,31 @@ function getYear(date: Date | string | number) {
 <template>
   <ul>
     <template v-if="!list || list.length === 0">
-      <div py2 opacity-50>
+      <div py2 text-gray-400>
         nothing here yet.
       </div>
     </template>
     <li v-for="(post, index) in list " :key="post.data.title" mb-6>
       <div v-if="!isSameYear(post.data.date, list[index - 1]?.data.date)" select-none relative h18 pointer-events-none>
-        <span text-7em color-transparent font-bold text-stroke-2 absolute top--0.2em relative -z-10 op60 class="text-stroke-[#eaeaea] dark:text-stroke-[#474747]">
+        <span text-7em color-transparent font-bold text-stroke-2 absolute top--0.2em relative -z-10 op60
+          class="text-stroke-[#eaeaea] dark:text-stroke-[#474747]">
           {{ getYear(post.data.date) }}
         </span>
       </div>
-      <a text-lg lh-tight nav-link flex="~ col gap-2" :target="getTarget(post)" :href="getHref(post)">
-        <div flex="~ col md:row gap-2 md:items-center">
-          <div flex="~ gap-2 items-center text-wrap">
-            <span lh-normal>
-              <i v-if="post.data.draft" text-base vertical-mid i-ri-draft-line />
-              {{ post.data.title }}
-            </span>
-          </div>
-        </div>
-        <div text-xs ws-nowrap flex="~ gap-1 items-center">
-          <time :datetime="getDate(post.data.date)" >{{ post.data.date }}</time>
+      <div text-lg lh-tight flex="~ col gap-1">
+        <a :target="getTarget(post)" :href="getHref(post)" nav-link text-xl>
+          <span lh-normal>
+            <i v-if="post.data.draft" text-base vertical-mid i-ri-draft-line />
+            {{ post.data.title }}
+          </span>
+        </a>
+        <div text-gray-500 text-sm>{{ post.data.description }}</div>
+        <div text-gray-500 text-xs ws-nowrap flex="~ gap-1 items-center">
+          <time :datetime="getDate(post.data.date)">{{ post.data.date }}</time>
           <div>·</div>
           <div v-if="post.data.location">{{ post.data.location }}</div>
         </div>
-        <div opacity-80 text-sm>{{ post.data.description }}</div>
-      </a>
+      </div>
     </li>
   </ul>
 </template>
