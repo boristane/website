@@ -2,12 +2,12 @@ import { getCollection } from 'astro:content'
 import type { CollectionPosts, Posts } from '../types'
 
 export function sortPostsByDate(itemA: CollectionPosts, itemB: CollectionPosts) {
-  return new Date(itemB.data.date).getTime() - new Date(itemA.data.date).getTime()
+  return new Date((itemB as any).data.date).getTime() - new Date((itemA as any).data.date).getTime()
 }
 
 export async function getPosts(type: Posts) {
-  return (await getCollection(type, ({ data }: { data: any }) => {
-    return import.meta.env.PROD ? data.draft !== true : true
+  return (await getCollection(type, data => {
+    return import.meta.env.PROD ? (data as any).draft !== true : true
   })).sort(sortPostsByDate)
 }
 

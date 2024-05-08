@@ -9,20 +9,6 @@ export const siteConfig = {
   },
   headerNavLinks: [
     {
-      text: 'home',
-      href: '/',
-    },
-    {
-      text: 'notes',
-      href: '/blog',
-    },
-    // {
-    //   text: "podcast",
-    //   href: "https://anchor.fm/not-feature",
-    // }
-  ],
-  pageNavLinks: [
-    {
       text: 'blog',
       href: '/blog',
     },
@@ -30,6 +16,14 @@ export const siteConfig = {
       text: 'talks',
       href: '/talks',
     },
+    {
+      text: 'projects',
+      href: '/projects',
+    },
+    // {
+    //   text: "podcast",
+    //   href: "https://anchor.fm/not-feature",
+    // }
   ],
   footerNavLinks: [
     {

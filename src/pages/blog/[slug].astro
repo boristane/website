@@ -41,12 +41,7 @@ const { Content } = await post.render();
         {title}
       </h1>
     </header>
-    <div class="flex items-center justify-between gap-2 ">
-      <PostCounter
-        type={"blog"}
-        slug={post?.slug}
-        client:load
-      />
+    <div class="flex items-center justify-end gap-2 ">
       <div class="text-main text-gray-400">{date}</div>
     </div>
     <div class="max-w-none prose">

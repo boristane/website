@@ -40,7 +40,6 @@ function toTop() {
         <i i-ri-arrow-right-s-line />
         <span>share on</span>
         <a v-for="link in shareLinks" :key="link.text" prose-link lh-tight flex class="item-center" :href="link.href + url">
-          <i v-if="link.icon"  :class="link.icon" mr-0.8 />
           <div>
             {{ link.text }}
           </div>

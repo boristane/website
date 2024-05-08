@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { getPosts } from '../utils/posts'
+import ListProjects from '../components/ListProjects.vue'
+
+const projects = await getPosts('projects')
+---
+
+<BaseLayout
+  title="Projects"
+  description="My projects :)"
+  pageNav={true}
+  pageOperate={true}
+>
+  <ListProjects list={projects as any[]} />
+</BaseLayout>

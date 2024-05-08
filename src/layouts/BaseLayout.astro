@@ -3,7 +3,6 @@ import { ViewTransitions } from 'astro:transitions'
 import BaseHead from '../components/BaseHead.astro'
 import Header from '../components/Header.vue'
 import Footer from '../components/Footer.vue'
-import PageNav from '../components/PageNav.vue'
 import PageOperate from '../components/PageOperate.vue'
 
 const { pageNav = false, pageOperate = false, width = "max-w-3xl", ...head } = Astro.props
@@ -16,9 +15,8 @@ const { pageNav = false, pageOperate = false, width = "max-w-3xl", ...head } = A
     <ViewTransitions />
   </head>
   <body class="bg-main text-main min-h-screen font-sans w-full">
-    <Header client:load />
+    <Header client:load  pathname={Astro.url.pathname}/>
     <main class:list={["grow mx-auto py-10 px-6", width]}>
-      {pageNav && <PageNav client:load pathname={Astro.url.pathname} />}
       <slot />
       {
         pageOperate && (

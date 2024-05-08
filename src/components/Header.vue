@@ -8,6 +8,10 @@ const navLinks = siteConfig.headerNavLinks || []
 
 const menuRef = ref(null)
 
+defineProps<{
+  pathname: string
+}>()
+
 const menu = ref(false)
 
 function toggleMenu() {
@@ -30,18 +34,18 @@ watchEffect(() => {
 </script>
 
 <template>
-  <header text-lg max-w-3xl mx-auto h-18 px-6 flex justify-between items-center relative>
-    <nav
-      v-show="menu" ref="menuRef" flex flex-wrap gap-4 sm:gap-6 sm:position-initial absolute z-199 top-15 sm:flex-row
-      flex-col sm:p0 p-4 bg-main border-1 border-main sm:border-none
-    >
-      <a v-for="link in navLinks" :key="link.text" nav-link :href="link.href">
+  <header text-lg max-w-3xl mx-auto h-32 sm:h-18 px-6 flex mt-5 sm:mt-0 justify-between items-start sm:items-center relative>
+    <div>
+      <a href="/" nav-link font-500 hover:text-gray-800>boris tane</a>
+    </div>
+    <div flex gap-2 sm:gap-6 sm:flex-row flex-col>
+      <a v-for="link in navLinks" :key="link.text" nav-link
+        :class="pathname.includes(link.href) ? 'text-sky-600' : 'opacity-60  hover:opacity-100'" :href="link.href">
         {{ link.text }}
       </a>
-    </nav>
-    <menu sm:hidden inline-block i-ri-menu-2-fill @click="toggleMenu" />
-    <div flex gap-4 sm:gap-6>
-      <a nav-link href="/rss.xml" i-ri-rss-line />
+      <div flex items-center justify-center>
+        <a nav-link href="/rss.xml" i-ri-rss-line opacity-60 hover:opacity-100 w-5 h-5 />
+      </div>
       <ThemeToggle />
     </div>
   </header>
