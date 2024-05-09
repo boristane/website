@@ -2,13 +2,13 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ListTags from "../../components/ListTags.vue";
 import { type CollectionPosts } from "../../types";
-import { getAllPosts } from "../../utils/posts";
+import { getAllPosts, getPosts } from "../../utils/posts";
 
 export const prerender = true;
 export async function getStaticPaths() {
   const posts = await getAllPosts();
 
-  return posts.map((post) => ({
+  return posts.map((post: any) => ({
     params: { slug: post.slug },
     props: {
       post,
@@ -24,6 +24,24 @@ if (post === undefined) {
   return new Response(JSON.stringify(await getAllPosts()));
 }
 
+const allPosts = (await getPosts('blog')) as any[];
+let next = undefined as any;
+const postIndex = allPosts.findIndex(
+  (p) => p.slug === post.slug,
+);
+if (postIndex >= allPosts.length - 1 || postIndex < 0) {
+  next = {
+    collection: post.collection,
+    slug: allPosts[0].slug,
+  };
+} else {
+  next = {
+    collection: post.collection,
+    slug: allPosts[postIndex + 1].slug,
+  };
+}
+
+
 const { title, image, description, date, tags, location } = post.data;
 const { Content } = await post.render();
 ---
@@ -35,6 +53,7 @@ const { Content } = await post.render();
   pageType="article"
   pageOperate={true}
   tags={tags}
+  next={next}
 >
   <article class="mb-16 sm:mb-24">
     <header class="mb-8">

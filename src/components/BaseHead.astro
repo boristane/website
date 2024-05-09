@@ -55,11 +55,11 @@ function formatCanonicalURL(url: string | URL) {
     basic: {
       title: "Boris Tane",
       type: "website",
-      image: "https://boristane.com/preview.png",
+      image: resolvedImage?.src || "",
     },
   }}
   twitter={{
-    creator: "boristane",
+    creator: "@boristane",
   }}
   extend={{
     // extending the default link tags
@@ -68,8 +68,7 @@ function formatCanonicalURL(url: string | URL) {
     meta: [
       {
         name: "twitter:image",
-        content:
-          "https://pbs.twimg.com/profile_banners/1042765170/1631984344/600x200",
+        content: resolvedImage?.src,
       },
       { name: "twitter:title", content: "Boris Tane" },
       { name: "twitter:description", content: "Boris Tane" },
@@ -95,31 +94,31 @@ function formatCanonicalURL(url: string | URL) {
 <meta name="description" content={description} />
 
 <!-- Open Graph / Facebook -->
-<meta property="og:type" content={pageType} />
-<meta property="og:url" content={formatCanonicalURL(canonicalURL)} />
-<meta property="og:title" content={title} />
-<meta property="og:description" content={description} />
+<meta name="og:type" property="og:type" content={pageType} />
+<meta name="og:url" property="og:url" content={formatCanonicalURL(canonicalURL)} />
+<meta name="og:title" property="og:title" content={title} />
+<meta name="og:description" property="og:description" content={description} />
 {resolvedImage?.src && <meta property="og:image" content={resolvedImage.src} />}
 {
   resolvedImage?.alt && (
-    <meta property="og:image:alt" content={resolvedImage.alt} />
+    <meta name="og:image:alt" property="og:image:alt" content={resolvedImage.alt} />
   )
 }
 
 <!-- X/Twitter -->
-<meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:url" content={formatCanonicalURL(canonicalURL)} />
-<meta property="twitter:title" content={title} />
-<meta property="twitter:site" content="@boristane" />
-<meta property="twitter:creator" content="@boristane" />
-<meta property="twitter:description" content={description} />
+<meta name="twitter:card" property="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" property="twitter:url" content={formatCanonicalURL(canonicalURL)} />
+<meta name="twitter:title" property="twitter:title" content={title} />
+<meta name="twitter:site" property="twitter:site" content="@boristane" />
+<meta name="twitter:creator" property="twitter:creator" content="@boristane" />
+<meta name="twitter:description" property="twitter:description" content={description} />
 {
   resolvedImage?.src && (
-    <meta property="twitter:image" content={resolvedImage.src} />
+    <meta name="twitter:image" property="twitter:image" content={resolvedImage.src} />
   )
 }
 {
   resolvedImage?.alt && (
-    <meta name="twitter:image:alt" content={resolvedImage?.alt} />
+    <meta name="twitter:image:alt" property="twitter:image:alt" content={resolvedImage?.alt} />
   )
 }

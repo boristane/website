@@ -8,6 +8,10 @@ withDefaults(defineProps<{
   showBack?: boolean
   url?: URL
   tags?: string[]
+  next?: {
+    collection: string,
+    slug: string,
+  }
 }>(), {
   showShare: false,
   showBack: true,
@@ -42,7 +46,8 @@ function toTop() {
       <div v-if="showShare" flex="~ gap-2 items-center flex-wrap" mb-2>
         <i i-ri-arrow-right-s-line />
         <span>share on</span>
-        <a v-for="link in shareLinks" :key="link.text" prose-link lh-tight flex class="item-center" :href="link.href + url">
+        <a v-for="link in shareLinks" :key="link.text" prose-link lh-tight flex class="item-center"
+          :href="link.href + url">
           <div>
             {{ link.text }}
           </div>
@@ -51,7 +56,11 @@ function toTop() {
       <div v-if="tags && tags.length" flex="~ gap-2 items-center" mb-2>
         <i i-ri-arrow-right-s-line />
         <span>grep</span>
-        <ListTags :tags="tags"/>
+        <ListTags :tags="tags" />
+      </div>
+      <div v-if="next" flex="~ gap-2 items-center" mb-2>
+        <i i-ri-arrow-right-s-line />
+        <a prose-link :href="`/${next.collection}/${next.slug}`">cd ../{{ next.slug }}</a>
       </div>
       <div v-if="showBack" flex="~ gap-2 items-center" mb-2>
         <i i-ri-arrow-right-s-line />

@@ -5,7 +5,7 @@ import Header from '../components/Header.vue'
 import Footer from '../components/Footer.vue'
 import PageOperate from '../components/PageOperate.vue'
 
-const { pageNav = false, pageOperate = false, width = "max-w-3xl", tags = [], ...head } = Astro.props
+const { pageNav = false, pageOperate = false, width = "max-w-3xl", tags = [], next, ...head } = Astro.props
 ---
 
 <!doctype html>
@@ -26,6 +26,7 @@ const { pageNav = false, pageOperate = false, width = "max-w-3xl", tags = [], ..
               showShare={head.pageType === 'article'}
               url={Astro.url}
               tags={tags}
+              next={next}
             />
           </div>
         )
