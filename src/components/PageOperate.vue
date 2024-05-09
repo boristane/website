@@ -41,7 +41,7 @@ function toTop() {
 </script>
 
 <template>
-  <div sm:flex="~ flex-row items-start justify-between" w-full font-mono text-main>
+  <div sm:flex="~ flex-row items-start justify-between" w-full font-mono text-main text-sm>
     <div>
       <div v-if="showShare" flex="~ gap-2 items-center flex-wrap" mb-2>
         <i i-ri-arrow-right-s-line />
@@ -54,16 +54,16 @@ function toTop() {
         </a>
       </div>
       <div v-if="tags && tags.length" flex="~ gap-2 items-center" mb-2>
-        <i i-ri-arrow-right-s-line />
+        <i i-ri-arrow-right-s-line flex-none />
         <span>grep</span>
         <ListTags :tags="tags" />
       </div>
-      <div v-if="next" flex="~ gap-2 items-center" mb-2>
-        <i i-ri-arrow-right-s-line />
-        <a prose-link :href="`/${next.collection}/${next.slug}`">cd ../{{ next.slug }}</a>
+      <div v-if="next" flex="~ gap-2 items-start" mb-2>
+        <i i-ri-arrow-right-s-line flex-none mt-1 />
+        <a prose-link text-wrap :href="`/${next.collection}/${next.slug}`">goto {{ next.slug }}</a>
       </div>
       <div v-if="showBack" flex="~ gap-2 items-center" mb-2>
-        <i i-ri-arrow-right-s-line />
+        <i i-ri-arrow-right-s-line flex-none />
         <a prose-link href="javascript:history.back(-1)">cd ..</a>
       </div>
     </div>
