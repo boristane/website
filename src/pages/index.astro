@@ -84,20 +84,34 @@ import siteConfig from "../site-config";
 </script>
 
 <BaseLayout description={siteConfig.description} image={siteConfig.image}>
-    <div class="text-xl mt-16">
-      <div class="mb-8 text-3xl">
-        <h1 id="hello" class="xl:text-9xl md:text-7xl text-6xl font-neucha text-[#eaeaea] dark:text-[#474747] relative -ml-2 -mb-4 xl:-ml-18 xl:-mb-12 -z-10">hello !</h1>
-        <div class="text-slate-900 text-2xl sm:text-3xl lg:text-4xl tracking-tight dark:text-white">
-          I'm <span id="name">boris tane</span>, a software engineer<br />
-        </div>
-      </div>
-      <div class="details">
-        <p>
-          I hangout on <a
-            href="https://twitter.com/BorisTane"
-            rel="noopener noreferrer" class="prose-link">twitter</a
-          >. hit me up, my dms are open!
-        </p>
-      </div>
+  <div class="text-xl mt-16">
+    <div class="mb-8 text-3xl">
+      <h1
+        id="hello"
+        class="xl:text-9xl md:text-7xl text-6xl font-neucha text-[#eaeaea] dark:text-[#474747] relative -ml-2 -mb-4 xl:-ml-18 xl:-mb-12 -z-10"
+      >
+        hello !
+      </h1>
+      <p
+        class="text-slate-900 text-2xl sm:text-3xl lg:text-4xl tracking-tight dark:text-white"
+      >
+        I'm <span id="name">boris tane</span>, a software engineer<br />
+      </p>
     </div>
+    <div class="details">
+      <p>
+        I currently work at <a
+          href="https://cloudflare.com"
+          class="prose-link"
+          target="_blank"
+          rel="noopener noreferrer">Cloudflare</a
+        >, where I focus on observability for the developer platform. I hangout
+        on <a
+          href="https://twitter.com/BorisTane"
+          rel="noopener noreferrer"
+          class="prose-link">twitter</a
+        > - hit me up, my dms are open!
+      </p>
+    </div>
+  </div>
 </BaseLayout>
