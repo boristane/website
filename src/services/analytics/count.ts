@@ -27,6 +27,7 @@ export const ColumnMappings = {
   osName: "blob9",
   slug: "blob10",
   type: "blob11",
+  deviceType: "blob12",
 
   newVisitor: "double1",
   newSession: "double2",

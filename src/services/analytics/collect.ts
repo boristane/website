@@ -13,6 +13,7 @@ interface DataPoint {
   referrer?: string;
   browserName?: string;
   deviceModel?: string;
+  deviceType?: string;
   osName?: string;
 
   newVisitor: number;
@@ -41,6 +42,7 @@ export async function collect(request: { VIEWS: AnalyticsEngineDataset; body: { 
     userAgent: userAgent,
     browserName: parsedUserAgent.getBrowser().name,
     deviceModel: parsedUserAgent.getDevice().model,
+    deviceType: parsedUserAgent.getDevice().type,
     osName: parsedUserAgent.getOS().name,
   };
 
@@ -75,6 +77,7 @@ function incrementView(analyticsEngine: AnalyticsEngineDataset, data: DataPoint,
       data.osName || "", // blob9
       data.slug || "", // blob10
       data.type || "", // blob11
+      data.deviceType || "", // blob12
     ],
     doubles: [data.newVisitor || 0, data.newSession || 0],
   };
