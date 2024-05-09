@@ -41,14 +41,14 @@ function getTarget(posts: Project) {
     </template>
     <li v-for="(post, index) in list " :key="post.data.title" mb-6>
       <div text-lg lh-tight flex="~ col gap-1">
-        <a :target="getTarget(post)" :href="getHref(post)" nav-link text-xl>
+        <a :target="getTarget(post)" :href="getHref(post)" nav-link text-2xl>
           <span lh-normal>
             <i v-if="post.data.draft" text-base vertical-mid i-ri-draft-line />
             {{ post.data.title }}
           </span>
         </a>
-        <div text-gray-500 text-sm>{{ post.data.description }}</div>
-        <div text-gray-500 text-xs ws-nowrap flex="~ gap-1 items-center">
+        <div text-gray-500 text-md>{{ post.data.description }}</div>
+        <div text-gray-500 text-sm ws-nowrap flex="~ gap-1 items-center">
           <time :datetime="getDate(post.data.date)" v-if="post.data.date">{{ post.data.date }}</time>
           <div>·</div>
           <div v-if="post.data.location">{{ post.data.location }}</div>
