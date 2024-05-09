@@ -63,7 +63,7 @@ function getYear(date: Date | string | number) {
           </span>
         </a>
         <div text-gray-500 text-sm>{{ post.data.description }}</div>
-        <div text-gray-500 text-xs ws-nowrap flex="~ gap-1 items-center">
+        <div text-gray-500 text-xs ws-nowrap flex="~ gap-1 items-center" flex-wrap w-full>
           <time :datetime="getDate(post.data.date)">{{ post.data.date }}</time>
           <div v-if="post.data.location" flex="~ gap-1 items-center">
             <div>·</div>
