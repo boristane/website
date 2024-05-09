@@ -9,6 +9,7 @@ import vue from '@astrojs/vue'
 
 // https://astro.build/config
 export default defineConfig({
+  site: "https://boristane.com",
   output: "server",
   adapter: cloudflare({
     platformProxy: {

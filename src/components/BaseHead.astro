@@ -18,8 +18,7 @@ const {
 const title = [Astro.props.title, siteConfig.title].filter(Boolean).join(" | ");
 const resolvedImage = image?.src
   ? {
-      // src: new URL(image.src, Astro.site).toString(),
-      src: "https://boristane.com",
+      src: new URL(image.src, Astro.site).toString(),
       alt: image.alt,
     }
   : undefined;
@@ -111,6 +110,8 @@ function formatCanonicalURL(url: string | URL) {
 <meta property="twitter:card" content="summary_large_image" />
 <meta property="twitter:url" content={formatCanonicalURL(canonicalURL)} />
 <meta property="twitter:title" content={title} />
+<meta property="twitter:site" content="@boristane" />
+<meta property="twitter:creator" content="@boristane" />
 <meta property="twitter:description" content={description} />
 {
   resolvedImage?.src && (
