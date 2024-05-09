@@ -21,6 +21,7 @@ const postsSchema = z.object({
   lang: z.string().optional().default('en-GB'),
   location: z.string().optional(),
   redirect: z.string().optional(),
+  tags: z.array(z.string()).optional(),
 })
 
 const pages = defineCollection({

@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import ListTags from './ListTags.vue';
+
 interface Post {
   id: string
   slug: string
@@ -63,8 +65,14 @@ function getYear(date: Date | string | number) {
         <div text-gray-500 text-sm>{{ post.data.description }}</div>
         <div text-gray-500 text-xs ws-nowrap flex="~ gap-1 items-center">
           <time :datetime="getDate(post.data.date)">{{ post.data.date }}</time>
-          <div>·</div>
-          <div v-if="post.data.location">{{ post.data.location }}</div>
+          <div v-if="post.data.location" flex="~ gap-1 items-center">
+            <div>·</div>
+            <div>{{ post.data.location }}</div>
+          </div>
+          <div v-if="post.data.tags && post.data.tags.length" flex="~ gap-1 items-center">
+            <div>·</div>
+            <ListTags :tags="post.data.tags" />
+          </div>
         </div>
       </div>
     </li>

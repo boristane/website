@@ -1,10 +1,13 @@
 <script lang="ts" setup>
 import { useWindowScroll } from '@vueuse/core'
+import ListTags from './ListTags.vue';
+
 
 withDefaults(defineProps<{
   showShare?: boolean
   showBack?: boolean
   url?: URL
+  tags?: string[]
 }>(), {
   showShare: false,
   showBack: true,
@@ -12,12 +15,12 @@ withDefaults(defineProps<{
 
 const shareLinks = [
   {
-    text: 'Twitter',
+    text: 'twitter',
     icon: 'i-ri-twitter-line',
     href: 'https://twitter.com/intent/tweet?url=',
   },
   {
-    text: 'Mail',
+    text: 'mail',
     icon: 'i-ri-mail-line',
     href: 'mailto:?subject=See%20this%20post&body=',
   },
@@ -45,7 +48,12 @@ function toTop() {
           </div>
         </a>
       </div>
-      <div v-if="showBack" flex="~ gap-2 items-center">
+      <div v-if="tags && tags.length" flex="~ gap-2 items-center" mb-2>
+        <i i-ri-arrow-right-s-line />
+        <span>grep</span>
+        <ListTags :tags="tags"/>
+      </div>
+      <div v-if="showBack" flex="~ gap-2 items-center" mb-2>
         <i i-ri-arrow-right-s-line />
         <a prose-link href="javascript:history.back(-1)">cd ..</a>
       </div>

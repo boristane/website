@@ -43,7 +43,7 @@ watchEffect(() => {
         :class="pathname.includes(link.href) ? 'text-sky-600' : 'opacity-60  hover:opacity-100'" :href="link.href">
         {{ link.text }}
       </a>
-      <div flex items-center justify-center>
+      <div flex items-center>
         <a nav-link href="/rss.xml" i-ri-rss-line opacity-60 hover:opacity-100 w-5 h-5 />
       </div>
       <ThemeToggle />

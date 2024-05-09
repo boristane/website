@@ -1,0 +1,27 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ListPosts from "../../components/ListPosts.vue";
+import { getAllPosts, getPosts } from "../../utils/posts";
+import type { CollectionPosts } from "../../types";
+
+const { slug } = Astro.params;
+const posts = await getAllPosts(slug);
+const pageTitle = `Tag: ${slug}`;
+const pageDescription = `Notes about ${slug}`;
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  pageNav={true}
+  pageOperate={true}
+>
+  <header class="mb-8">
+    <h1 class="text-title">
+      Tag: <span class="bg-gray-100 px-2 py-[1px] text-sky-600 rounded"
+        >{slug}</span
+      > ({posts.length})
+    </h1>
+  </header>
+  <ListPosts list={posts as any[]} />
+</BaseLayout>

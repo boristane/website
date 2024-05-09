@@ -2,7 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { type CollectionPosts } from "../../types";
 import { getAllPosts } from "../../utils/posts";
-import PostCounter from "../../components/PostCounter.vue";
+import ListTags from "../../components/ListTags.vue";
 
 export const prerender = true;
 export async function getStaticPaths() {
@@ -24,7 +24,7 @@ if (post === undefined) {
   return new Response(JSON.stringify(await getAllPosts()));
 }
 
-const { title, image, description, date } = (post as any).data;
+const { title, image, description, date, tags, location } = (post as any).data;
 const { Content } = await (post as any).render();
 ---
 
@@ -34,16 +34,33 @@ const { Content } = await (post as any).render();
   image={image}
   pageType="article"
   pageOperate={true}
+  tags={tags}
 >
   <article class="mb-16 sm:mb-24">
     <header class="mb-8">
       <h1 class="text-title">
         {title}
       </h1>
+      <div class="flex items-center gap-2 text-main text-gray-400 mt-4">
+        <div >{date}</div>
+        {
+          location && (
+            <div class="flex gap-1 items-center">
+              <div>·</div>
+              <div>{ location }</div>
+            </div>
+          )
+        }
+        {
+          tags?.length && (
+            <div class="flex gap-1 items-center">
+              <div>·</div>
+              <ListTags tags={tags} />
+            </div>
+          )
+        }
+      </div>
     </header>
-    <div class="flex items-center justify-end gap-2 ">
-      <div class="text-main text-gray-400">{date}</div>
-    </div>
     <div class="max-w-none prose">
       <Content />
     </div>
