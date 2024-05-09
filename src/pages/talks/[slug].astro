@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { type CollectionPosts } from "../../types";
 import { getAllPosts, getPosts } from "../../utils/posts";
 import ListTags from "../../components/ListTags.vue";
+import PostCounter from "../../components/PostCounter.vue";
 
 export const prerender = true;
 export async function getStaticPaths() {
@@ -24,23 +25,20 @@ if (post === undefined || post === null) {
   return new Response(JSON.stringify(await getAllPosts()));
 }
 
-const allPosts = (await getPosts('talks')) as any[];
+const allPosts = (await getPosts("talks")) as any[];
 let next = undefined as any;
-const postIndex = allPosts.findIndex(
-  (p) => p.slug === post.slug,
-);
+const postIndex = allPosts.findIndex((p) => p.slug === post.slug);
 if (postIndex >= allPosts.length - 1 || postIndex < 0) {
   next = {
     collection: post.collection,
-    slug: allPosts[0].slug,
+    slug: allPosts[0]?.slug,
   };
 } else {
   next = {
     collection: post.collection,
-    slug: allPosts[postIndex + 1].slug,
+    slug: allPosts[postIndex + 1]?.slug,
   };
 }
-
 
 const { title, image, description, date, tags, location } = (post as any).data;
 const { Content } = await (post as any).render();
@@ -52,21 +50,22 @@ const { Content } = await (post as any).render();
   image={image}
   pageType="article"
   pageOperate={true}
+  comments={true}
   tags={tags}
   next={next}
 >
-  <article class="mb-16 sm:mb-24">
+  <article class="mb-8 sm:mb-12">
     <header class="mb-8">
       <h1 class="text-title">
         {title}
       </h1>
       <div class="flex items-center gap-2 text-main text-gray-400 mt-4">
-        <div >{date}</div>
+        <div>{date}</div>
         {
           location && (
             <div class="flex gap-1 items-center">
               <div>·</div>
-              <div>{ location }</div>
+              <div>{location}</div>
             </div>
           )
         }
@@ -80,6 +79,7 @@ const { Content } = await (post as any).render();
         }
       </div>
     </header>
+    <PostCounter type={"talk"} slug={post?.slug} client:load />
     <div class="max-w-none prose">
       <Content />
     </div>

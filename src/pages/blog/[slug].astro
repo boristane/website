@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import ListTags from "../../components/ListTags.vue";
 import { type CollectionPosts } from "../../types";
 import { getAllPosts, getPosts } from "../../utils/posts";
+import PostCounter from "../../components/PostCounter.vue";
 
 export const prerender = true;
 export async function getStaticPaths() {
@@ -32,12 +33,12 @@ const postIndex = allPosts.findIndex(
 if (postIndex >= allPosts.length - 1 || postIndex < 0) {
   next = {
     collection: post.collection,
-    slug: allPosts[0].slug,
+    slug: allPosts[0]?.slug,
   };
 } else {
   next = {
     collection: post.collection,
-    slug: allPosts[postIndex + 1].slug,
+    slug: allPosts[postIndex + 1]?.slug,
   };
 }
 
@@ -52,10 +53,11 @@ const { Content } = await post.render();
   image={image}
   pageType="article"
   pageOperate={true}
+  comments={true}
   tags={tags}
   next={next}
 >
-  <article class="mb-16 sm:mb-24">
+  <article class="mb-8 sm:mb-12">
     <header class="mb-8">
       <h1 class="text-title">
         {title}
@@ -80,6 +82,11 @@ const { Content } = await post.render();
         }
       </div>
     </header>
+    <PostCounter
+      type={"blog"}
+      slug={post?.slug}
+      client:load
+    />
     <div class="max-w-none prose">
       <Content />
     </div>
