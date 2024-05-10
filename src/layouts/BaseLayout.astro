@@ -12,6 +12,7 @@ const {
   tags = [],
   next,
   comments = false,
+  newsletter = false,
   ...head
 } = Astro.props;
 ---
@@ -35,6 +36,18 @@ const {
               url={Astro.url}
               tags={tags}
               next={next}
+            />
+          </div>
+        )
+      }
+      {
+        newsletter && (
+          <div class="mt-6 pt-6 border-t border-gray-200 text-center">
+            <div class="mb-4">Join <span class="font-bold">200+</span> developers getting updates on cloud computing, observability, serverless and more.</div>
+            <script
+              async
+              data-uid="65bc3a0932"
+              src="https://boristane.ck.page/65bc3a0932/index.js"
             />
           </div>
         )
