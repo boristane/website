@@ -1,9 +1,9 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'
-import { getPosts } from '../utils/posts'
-import ListProjects from '../components/ListProjects.vue'
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getPosts } from "../utils/posts";
+import Project from "../components/Project.astro";
 
-const projects = await getPosts('projects')
+const projects = await getPosts("projects");
 ---
 
 <BaseLayout
@@ -12,5 +12,22 @@ const projects = await getPosts('projects')
   pageNav={true}
   pageOperate={true}
 >
-  <ListProjects list={projects as any[]} />
+  <h1 class="text-title mb-8 sm:mb-12">Building software is fun</h1>
+  <div class="text-main">
+    <p>That's why I usually build most random ideas that cross my mind.</p>
+    <p class="mt-4">
+      I like building things I can use, or my friends can use. Here's a
+      selection of the things I actually "finished"; they range from 1 weekend
+      experimentation to startups. I'm always happy to chat about these :) <a
+        href="mailto:me@boristane.com" class="prose-link">hit me up</a
+      >!
+    </p>
+  </div>
+  {
+    projects.map((project) => (
+      <div class="my-8 mt-16 sm:mt-1t sm:mb-12">
+        <Project page={project} />
+      </div>
+    ))
+  }
 </BaseLayout>

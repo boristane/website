@@ -1,0 +1,67 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import type { CollectionPosts } from "../types";
+import ListTopics from "./ListTopics.vue";
+
+type Props = { page: CollectionPosts };
+
+async function getRepoStars(repo: string): Promise<number | null> {
+  const url = `https://api.github.com/repos/${repo}`;
+
+  try {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      console.error(`Failed to fetch repository: ${response.statusText}`);
+      return null;
+    }
+
+    const data = await response.json();
+
+    const stars = (data as any).stargazers_count;
+    return stars;
+  } catch (error) {
+    console.error(`Error fetching repository data: ${(error as any).message}`);
+    return null;
+  }
+}
+
+function getDate(date: string) {
+  const d = new Date(date);
+  const options = { year: "numeric", month: "long" };
+  const formatter = new Intl.DateTimeFormat("en-US", options);
+  return formatter.format(d);
+}
+
+const { page } = Astro.props;
+const { title, image, description, topics, repo, date } = page.data;
+const imageSrc = `/projects/${image}`;
+
+const { Content } = await page.render();
+---
+
+<div>
+    <div class="text-2xl lh-normal text-main">
+      {title}
+    </div>
+  <div class="flex items-center gap-1">
+    <div class="text-gray-400 text-main">
+      <time datetime={getDate(date)}>{getDate(date)}</time>
+    </div>
+    {repo && <div>{getRepoStars(repo)}</div>}
+    <div class="flex gap-1 items-center">
+      <div>·</div>
+      <ListTopics topics={topics} />
+    </div>
+  </div>
+  <div class="my-4">
+    <img src={imageSrc} alt={title} class="rounded-xl">
+  </div>
+  <div class="text-xl text-main text-gray-400">
+    {description}
+  </div>
+  <div class="max-w-none prose">
+    <Content />
+  </div>
+</div>
