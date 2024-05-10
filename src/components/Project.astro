@@ -45,8 +45,8 @@ const { Content } = await page.render();
     <div class="text-2xl lh-normal text-main">
       {title}
     </div>
-  <div class="flex items-center gap-1">
-    <div class="text-gray-400 text-main">
+  <div class="flex items-center gap-1 flex-wrap">
+    <div class="text-gray-400 text-main flex-none">
       <time datetime={getDate(date)}>{getDate(date)}</time>
     </div>
     {repo && <div>{getRepoStars(repo)}</div>}
