@@ -2,8 +2,10 @@
 /// <reference types="astro/client" />
 
 type AnalyticsEngineDataset = import("@cloudflare/workers-types").AnalyticsEngineDataset;
+type D1Database = import("@cloudflare/workers-types").D1Database;
 type ENV = {
   VIEWS: AnalyticsEngineDataset;
+  DB: D1Database;
   BASELIME_API_KEY: string;
   IS_LOCAL: string;
   CLOUDFLARE_TOKEN: string;

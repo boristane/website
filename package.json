@@ -11,7 +11,10 @@
     "deploy": "astro build && wrangler pages deploy",
     "cf-typegen": "wrangler types",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "drizzle:generate": "npx drizzle-kit generate",
+    "d1:migrate:local": "npx wrangler d1 migrations apply website --local",
+    "d1:migrate": "npx wrangler d1 migrations apply website --remote"
   },
   "dependencies": {
     "@astrojs/check": "^0.5.10",
@@ -24,6 +27,7 @@
     "@unocss/reset": "^0.59.4",
     "astro": "^4.7.0",
     "astro-seo": "^0.8.3",
+    "drizzle-orm": "^0.30.10",
     "marked": "^12.0.2",
     "typescript": "^5.4.5",
     "ua-parser-js": "^1.0.37",
@@ -36,6 +40,7 @@
     "@iconify/json": "^2.2.204",
     "@types/ua-parser-js": "^0.7.39",
     "@vueuse/core": "^10.9.0",
+    "drizzle-kit": "^0.21.0",
     "eslint": "^8.57.0",
     "eslint-plugin-astro": "^0.31.4",
     "eslint-plugin-format": "^0.1.1",

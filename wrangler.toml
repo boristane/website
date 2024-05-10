@@ -9,3 +9,8 @@ CLOUDFLARE_ACCOUNT = "306f899f8d74eab80969c512596f28d9"
 [[analytics_engine_datasets]]
 binding = "VIEWS"
 dataset = "views"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "website"
+database_id = "4bed92b0-ef2d-4f6b-b31c-c751a1de8bfb"
