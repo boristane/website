@@ -8,9 +8,10 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
   const { VIEWS, BASELIME_API_KEY, IS_LOCAL } = locals.runtime.env;
 
+  const  url = new URL(request.url);
   const logger = new BaselimeLogger({
     service: "website",
-    namespace: (new URL(request.url)).hostname,
+    namespace: `${request.method} ${url.hostname}${url.pathname}`,
     apiKey: BASELIME_API_KEY,
     ctx: locals.runtime.ctx,
     isLocalDev: !!IS_LOCAL,
