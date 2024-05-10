@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/d1";
 import { eq, isNull } from 'drizzle-orm/expressions'
 
 
-export async function createUser(DB: D1Database, data: { id: string, email: string, name: string }) {
+export async function createUser(DB: D1Database, data: { id: string, email: string, name?: string, isVerified: boolean }) {
   const db = drizzle(DB);
   await db.insert(users)
     .values(data)
