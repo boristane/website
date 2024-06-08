@@ -10,3 +10,13 @@ html.dark .astro-code span {
 .prose a {
   --at-apply: prose-link;
 }
+
+.prose img {
+    width: 100;
+    margin: 0 auto;
+}
+
+.prose .twitter-tweet {
+  width: 100;
+    margin: 0 auto;
+}

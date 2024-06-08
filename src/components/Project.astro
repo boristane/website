@@ -36,7 +36,7 @@ function getDate(date: string) {
 
 const { page } = Astro.props;
 const { title, image, description, topics, repo, date } = page.data;
-const imageSrc = `/projects/${image}`;
+const imageSrc = `/assets/projects/${image}`;
 
 const { Content } = await page.render();
 ---

@@ -1,0 +1,99 @@
+---
+title: Lessons from starting, building, and exiting a devtools startup
+description: Key learnings from building Baselime
+date: 2024-06-08
+tags:
+  - startup
+---
+
+I started [Baselime](https://baselime.io), an observability startup, in October 2021. 2.5 years later [we joined Cloudflare](https://assets/blog.cloudflare.com/cloudflare-acquires-baselime-expands-observability-capabilities). I was a first-time solo founder and I made more mistakes than I could count. 
+
+In this post, I'm reflecting on my time leading Baselime. I believe it will resonate with technical founders currently building or considering building similar companies. It focuses on early-stage, pre- Product Market Fit (PMF) developer tooling or infrastructure startups. I'll refrain from typical advice such as "build a strong team", or "build something people want", smarter people already [wrote about this](https://www.paulgraham.com/articles.html) extensively.
+
+## Be obsessed with finding Product Market Fit
+
+Your one and only mission as an early-stage founder is to [find Product Market Fit](https://www.sequoiacap.com/article/pmf-framework/) as quickly as possible. Nothing else matters.
+
+It's extremely easy to focus on software architecture, clean code, tests, scalability, refactoring, etc.
+
+These things don't matter.
+
+![test](/assets/blog/learnings-from-starting-building-and-exiting-a-devtools-startup/build-sell.jpg)
+
+I can hear you thinking that your startup is different and you need scalability from day 1. You're wrong. Your solution will evolve. Obviously, it's easier to evolve if the foundations are solid, but that's assuming the solid foundations you're building are for the right thing. Your early thesis about the world is most likely incorrect and you'll have to adjust.
+
+I spent too much time building the foundations for "[Observability as Code](https://baselime.io/assets/blog/why-observability-as-code)". Imagine the best parts of CloudFormation and Terraform for observability: a CLI and a state management backend. Developers write multiple YAML files (with variables, interpolation, templates, etc.), the CLI combines them into a giant JSON file, uploads it to the backend which decides which resources (alerts, queries, dashboards, etc.) to create, edit or delete and the order of those operations.
+
+Despite all the hours spent building, refining and improving this, nobody cared. I was more concerned about building an elegant solution than actually finding PMF. Don't do this. 
+
+Instead, iterate fast, measure the result of your experiments, and if something doesn't work, throw it away and move on quickly. When you find what works, you'll refactor and improve.
+
+## Better, faster, cheaper is not enough anymore
+
+It's common startup wisdom that your solution should be [better, faster, cheaper](https://youtu.be/opkHJLVAM4A) than the competition. Whilst there's truth in this statement, in 2024 this is not enough anymore. Incumbents in the developer tools space iterate fast, and there are 5 new startups going after your market every quarter.
+
+Instead, look for technological shifts and focus your efforts where you're a monopoly, rather than competing.
+
+![test](/assets/blog/learnings-from-starting-building-and-exiting-a-devtools-startup/monopoly.jpg)
+
+I started Baselime with a focus on observability for AWS Lambda. There was a consensus among our early users that [Baselime was better, faster and cheaper](https://x.com/patjakubik/status/1687204692915539970) than the competition. But this wasn't enough to stand out in a crowded space.
+
+Until I noticed a massive segment where we could be a monopoly: the new developer platforms such as [Cloudflare](https://www.cloudflare.com/en-gb/developer-platform/), [Vercel](https://vercel.com), [Fly.io](https://fly.io), [Koyeb](https://www.koyeb.com/), [Render](https://render.com/), etc.
+
+Within 1 week, we built a [Vercel integration](https://vercel.com/integrations/baselime) and instantly doubled our weekly active users. Likewise for our [Cloudflare integration](https://developers.cloudflare.com/workers/observability/baselime-integration/).
+
+
+## Don't be stubborn
+
+If something is not growing fast, drop it quickly and work on something else. There are no points for stubbornness, you're in a race against running out of money before PMF.
+
+In April 2023, I spoke with the Cloudflare team about observability on the Workers platform, but we built our Cloudflare integration only 6 months later. It actually took only 1 week to build it.
+
+Why wait 6 months to build something so obvious? 6 months is an eternity for an early-stage startup.
+
+During this time, I pretended to "[focus on a single problem](https://paulgraham.com/startupideas.html)" to justify being stubborn on becoming the best observability platform for AWS Lambda. I ignored all market signals, both from developers and market research, telling me to shift my focus to an adjacent problem. Don't do this.
+
+
+## Do things that don't scale, really
+
+We're developers, we want to automate everything. But sometimes you've got to roll up your sleeves and do the tedious, unsexy but necessary work to grow.
+
+We built sales automation and lead generation pipelines, but nothing worked. Our user growth was flat. Until I decided to ignore all the best practices and do what works for me, something I'll actually enjoy: personally message every developer with a slight interest in cloud computing I could find on Twitter. It was unglamorous, tedious, and monotonous, but it had to be done. This directly translated to signups, sales and referrals.
+
+I should have done this months earlier.
+
+![test](/assets/blog/learnings-from-starting-building-and-exiting-a-devtools-startup/scale.png)
+
+
+## Create hype, don't be shy
+
+[If you build it, they won't come](https://www.forbes.com/sites/georgedeeb/2013/11/06/if-you-build-it-they-may-not-come-budget-ahead-for-startup-marketing/). You must create hype around your product. Technical founders tend to view hype as a bad thing, used to sell snake oil.
+
+When in fact, hype is a cheat code to get in the public awareness. Get developers to know your solution exists, its benefits and its limitations. It doesn't matter if they don't sign up today. Eventually (hopefully in the near future) they, or someone they know, will need to solve your problem and your solution should be the first they consider. Hype will get you there faster.
+
+<blockquote class="twitter-tweet">
+<p lang="en" dir="ltr">you thought we were done?<br /><br />distributed tracing for <a href="https://twitter.com/CloudflareDev?ref_src=twsrc%5Etfw">@CloudflareDev</a> with multi-cloud support <br /><br />- automatic correlation between logs and traces<br />- support for workers, kv, durable objects, queues<br/>- all powered by the <a href="https://twitter.com/baselimehq?ref_src=twsrc%5Etfw">@baselimehq</a> query engine<br/><br/>and this design 😍✨<br/><br/>my dms are open if… <a href="https://t.co/KcLZSr4DQP">pic.twitter.com/KcLZSr4DQP</a></p>&mdash; boris tane (@boristane) <a href="https://twitter.com/boristane/status/1717590624596083046?ref_src=twsrc%5Etfw">October 26, 2023</a>
+</blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+## Get a side project
+
+[I love building software](/projects). It's my main hobby. But building Baselime meant I didn't have a hobby anymore. I didn't have space to do this thing I love without the pressure of solving a problem for developers.
+
+I kept shipping every day, but there are days I actually despised building software, I didn't want to build software but I had to.
+
+Get a side project, where you can explore and build whatever random useless thing you want. Your overall happiness levels will thank you - building a startup is hard enough, don't go through it without hobbies :)
+
+## Exiting a company is hard
+
+If you thought starting a company is hard, try selling one.
+
+Baselime was a pretty simple business when we joined Cloudflare. Just a few employees and our main assets were our IP. However, it still took quite a bit of work, from the negotiations phase to all the accounting and legal work involved.
+
+The most difficult part was how nerve wracking it all was. I was a solo-founder and until Baselime, the most complex contracts I ever signed were tenancy agreements.
+
+After 2 years of building and selling, Baselime was part of my identity. The reality of joining a larger organisation was challenging. Thankfully a few trusted advisors truly supported me throughout the process. Joining Cloudflare was the best decision to achieve our vision: enabling every developer to resolve issues before they become problems.
+
+---
+
+The Baselime journey taught me much more than these highlights. I'm always keen to connect with dev tool founders and aspiring founders. Hit me up, [my dms are open](https://x.com/boristane) :)
+

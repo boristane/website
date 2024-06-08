@@ -6,7 +6,7 @@ import { createUser } from "../../../services/db/users";
 export const POST: APIRoute = async ({ request, locals }) => {
   const { DB, BASELIME_API_KEY, IS_LOCAL } = locals.runtime.env;
 
-  const  url = new URL(request.url);
+  const url = new URL(request.url);
   const logger = new BaselimeLogger({
     service: "website",
     namespace: `${request.method} ${url.hostname}${url.pathname}`,

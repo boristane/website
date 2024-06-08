@@ -11,11 +11,11 @@ export type Props = {
 };
 
 const {
-  description = "",
+  description = "Hello, I'm Boris Tane, a software engineer. This is my personal website with my blog and all the talks and projects I'm working on.",
   image = siteConfig.image,
   pageType = "website",
 } = Astro.props;
-const title = [Astro.props.title, siteConfig.title].filter(Boolean).join(" | ");
+const title = [Astro.props.title || "Boris Tane", siteConfig.title].filter(Boolean).join(" | ");
 const resolvedImage = image?.src
   ? {
       src: new URL(image.src, Astro.site).toString(),
@@ -49,8 +49,8 @@ function formatCanonicalURL(url: string | URL) {
 
 
 <SEO
-  title="Boris Tane"
-  description="Hello, I'm Boris Tane, a software engineer. This is my personal website with my blog and all the talks and projects I'm working on."
+  title={title}
+  description={description}
   openGraph={{
     basic: {
       title: "Boris Tane",

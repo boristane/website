@@ -12,7 +12,7 @@ export async function getPosts(type: Posts, tag?: string) {
       return (data as any).data.tags?.includes(tag) ? true : false;
     }
     return true;
-  })).filter((item: CollectionPosts) => isProd ? (item as any).draft !== true : true).sort(sortPostsByDate)
+  })).filter((item: CollectionPosts) => isProd ? (item as any).data.draft !== true : true).sort(sortPostsByDate)
 }
 
 export async function getAllPosts(tag?: string) {
