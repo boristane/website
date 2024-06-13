@@ -1,0 +1,503 @@
+---
+import { marked } from "marked";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import siteConfig from "../site-config";
+
+---
+
+<script>
+  function extractLuminance(hex: string) {
+    const rgb = hexToRgb(hex);
+    let colors = [rgb.r, rgb.g, rgb.b];
+    let lum = colors.map((val) => val / 255);
+    return (
+      lum.reduce((acc, val) => {
+        return acc + val;
+      }) / lum.length
+    );
+  }
+
+  function generateColor() {
+    const hexLetters = [..."0123456789ABCDEF"];
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+      color += hexLetters[Math.floor(Math.random() * hexLetters.length)];
+    }
+    return color;
+  }
+
+  function generateBeautifulColor() {
+    // Generate a random hue (0-360)
+    const hue = Math.floor(Math.random() * 360);
+    // Set saturation and lightness to values that produce beautiful colors
+    const saturation = 70 + Math.random() * 30; // Saturation between 70% and 100%
+    const lightness = 50 + Math.random() * 20; // Lightness between 50% and 70%
+
+    return hslToHex(hue, saturation, lightness);
+    // return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  }
+
+  function hslToHex(h: number, s: number, l: number) {
+    s /= 100;
+    l /= 100;
+
+    let c = (1 - Math.abs(2 * l - 1)) * s;
+    let x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    let m = l - c / 2;
+    let r = 0,
+      g = 0,
+      b = 0;
+
+    if (0 <= h && h < 60) {
+      r = c;
+      g = x;
+      b = 0;
+    } else if (60 <= h && h < 120) {
+      r = x;
+      g = c;
+      b = 0;
+    } else if (120 <= h && h < 180) {
+      r = 0;
+      g = c;
+      b = x;
+    } else if (180 <= h && h < 240) {
+      r = 0;
+      g = x;
+      b = c;
+    } else if (240 <= h && h < 300) {
+      r = x;
+      g = 0;
+      b = c;
+    } else if (300 <= h && h < 360) {
+      r = c;
+      g = 0;
+      b = x;
+    }
+    r = Math.round((r + m) * 255);
+    g = Math.round((g + m) * 255);
+    b = Math.round((b + m) * 255);
+
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+  }
+  function rgbToHsl(
+    r: number,
+    g: number,
+    b: number,
+  ): { h: number; s: number; l: number } {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    let max = Math.max(r, g, b),
+      min = Math.min(r, g, b);
+    let h: number = 0,
+      s: number,
+      l: number = (max + min) / 2;
+
+    if (max === min) {
+      h = s = 0; // achromatic
+    } else {
+      let d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r:
+          h = (g - b) / d + (g < b ? 6 : 0);
+          break;
+        case g:
+          h = (b - r) / d + 2;
+          break;
+        case b:
+          h = (r - g) / d + 4;
+          break;
+      }
+      h /= 6;
+    }
+
+    return { h, s, l };
+  }
+
+  function hslToRgb(
+    h: number,
+    s: number,
+    l: number,
+  ): { r: number; g: number; b: number } {
+    let r: number, g: number, b: number;
+
+    if (s === 0) {
+      r = g = b = l; // achromatic
+    } else {
+      const hue2rgb = (p: number, q: number, t: number) => {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1 / 6) return p + (q - p) * 6 * t;
+        if (t < 1 / 3) return q;
+        if (t < 1 / 2) return p + (q - p) * (2 / 3 - t) * 6;
+        return p;
+      };
+
+      let q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      let p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1 / 3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1 / 3);
+    }
+
+    return {
+      r: Math.round(r * 255),
+      g: Math.round(g * 255),
+      b: Math.round(b * 255),
+    };
+  }
+  function hexToRgb(hex: string): { r: number; g: number; b: number } {
+    let shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+    let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : { r: 0, g: 0, b: 0 };
+  }
+
+  function rgbToHex(r: number, g: number, b: number): string {
+    return (
+      "#" +
+      ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()
+    );
+  }
+
+  function getRandomText(length: number): string {
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:'\",.<>?/`~";
+    let result = "";
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
+
+  function getOppositeColor(hex: string): string {
+    let { r, g, b } = hexToRgb(hex);
+    // Calculate complementary color
+    r = 255 - r;
+    g = 255 - g;
+    b = 255 - b;
+    return rgbToHex(r, g, b);
+  }
+
+  function getHarmoniousColor(hex: string): string {
+    let { r, g, b } = hexToRgb(hex);
+    let { h, s, l } = rgbToHsl(r, g, b);
+    h = (h + 0.0833) % 1; // 0.0833 is 30 degrees in hue (30/360)
+    let rgb = hslToRgb(h, s, l);
+    return rgbToHex(rgb.r, rgb.g, rgb.b);
+  }
+
+  function shadeColor(color: string, percent: number): string {
+    let { r, g, b } = hexToRgb(color);
+    r = Math.min(255, Math.max(0, Math.round((r * (100 + percent)) / 100)));
+    g = Math.min(255, Math.max(0, Math.round((g * (100 + percent)) / 100)));
+    b = Math.min(255, Math.max(0, Math.round((b * (100 + percent)) / 100)));
+    return rgbToHex(r, g, b);
+  }
+
+  function drawBackground(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    color: string,
+  ) {
+    const gradient = ctx.createLinearGradient(
+      0,
+      0,
+      canvas.width,
+      canvas.height,
+    );
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(1, shadeColor(color, 30));
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  interface CircleOptions {
+    ctx: CanvasRenderingContext2D;
+    x: number;
+    y: number;
+    radius: number;
+    color: string;
+  }
+
+  function drawCircle(opts: CircleOptions) {
+    const { ctx, x, y, radius, color } = opts;
+    const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+    gradient.addColorStop(1, color);
+    gradient.addColorStop(0, shadeColor(color, 100));
+
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = gradient;
+    ctx.fill();
+  }
+
+  function isCircleOverlap(
+    circle1: { x: number; y: number; radius: number },
+    circle2: { x: number; y: number; radius: number },
+  ) {
+    const dx = circle1.x - circle2.x;
+    const dy = circle1.y - circle2.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    return distance < circle1.radius + circle2.radius;
+  }
+
+  interface RectangleOptions {
+    ctx: CanvasRenderingContext2D;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    color: string;
+  }
+
+  function drawRectangle(opts: RectangleOptions) {
+    const { ctx, x, y, w, h, color } = opts;
+    const gradient = ctx.createLinearGradient(x, y, x + w, y + h);
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(1, shadeColor(color, 100));
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(x, y, w, h);
+  }
+
+  interface TextOptions {
+    ctx: CanvasRenderingContext2D;
+    text: string;
+    x: number;
+    y: number;
+    fontSize: number;
+    color: string;
+    font?: string;
+    outline?: boolean;
+    gradient?: boolean;
+    center: boolean;
+  }
+
+  function drawText(options: TextOptions) {
+    const {
+      ctx,
+      text,
+      x,
+      y,
+      fontSize,
+      color,
+      outline = false,
+      gradient = false,
+      center,
+    } = options;
+    ctx.font = `bold ${fontSize}px Arial`;
+
+    // Function to wrap text into multiple lines
+    function wrapText(
+      ctx: CanvasRenderingContext2D,
+      text: string,
+      maxWidth: number,
+    ): string[] {
+      const words = text.split(" ");
+      const lines: string[] = [];
+      let currentLine = words[0];
+
+      for (let i = 1; i < words.length; i++) {
+        const word = words[i];
+        const width = ctx.measureText(currentLine + " " + word).width;
+        if (width < maxWidth) {
+          currentLine += " " + word;
+        } else {
+          lines.push(currentLine);
+          currentLine = word;
+        }
+      }
+      lines.push(currentLine);
+      return lines;
+    }
+
+    // Create a gradient for the text if required
+    let fillStyle: string | CanvasGradient = color;
+    if (gradient) {
+      const textGradient = ctx.createLinearGradient(
+        x,
+        y - fontSize,
+        x + ctx.measureText(text).width,
+        y,
+      );
+      textGradient.addColorStop(0, "#00bfff");
+      textGradient.addColorStop(1, "#000080");
+      fillStyle = textGradient;
+    }
+
+    ctx.fillStyle = fillStyle;
+    ctx.strokeStyle = color;
+
+    const maxWidth = ctx.canvas.width - 40; // Max width for text, leaving 20px padding on each side
+    const lines = wrapText(ctx, text, maxWidth);
+    const lineHeight = fontSize * 1.2; // Line height as 1.2 times the font size
+
+    // Draw each line centered
+    lines.forEach((line, index) => {
+      const lineX = center
+        ? (ctx.canvas.width - ctx.measureText(line).width) / 2
+        : x;
+      const lineY = center ? (y - (lines.length - 1) * fontSize) + (index) * lineHeight : y;
+      
+      if (outline) {
+        ctx.strokeText(line, lineX, lineY);
+      } else {
+        ctx.fillText(line, lineX, lineY);
+      }
+    });
+  }
+
+  function hello(
+    canvas: HTMLCanvasElement,
+    mainColor: string,
+    title: string,
+    font: string,
+    fontSize: number,
+  ) {
+    const ctx = canvas.getContext("2d");
+    const secondaryColor = getHarmoniousColor(mainColor);
+
+    if (!ctx) {
+      return;
+    }
+
+    drawBackground(canvas, ctx, mainColor);
+
+    function randomPositionAndSize(maxWidth: number, maxHeight: number) {
+      const x = Math.random() * (canvas.width - maxWidth);
+      const y = Math.random() * (canvas.height - maxHeight);
+
+      const minWidth = maxWidth / 4;
+      const minHeight = maxHeight / 4;
+      const minRadius = Math.max(maxWidth, maxHeight) / 4;
+      const width = Math.random() * maxWidth + minWidth;
+      const height = Math.random() * maxHeight + minHeight;
+      const radius =
+        Math.random() * (Math.max(maxWidth, maxHeight) / 4) + minRadius;
+      return { x, y, width, height, radius };
+    }
+
+    const numRectangles = Math.floor(Math.random() * 4) + 1;
+    const numCircles = Math.floor(Math.random() * 2) + 1;
+    const numTexts = Math.floor(Math.random() * 6) + 6;
+
+    for (let i = 0; i < numRectangles; i++) {
+      const { x, y, width, height, radius } = randomPositionAndSize(400, 400);
+      const color = mainColor;
+
+      drawRectangle({
+        ctx,
+        x,
+        y,
+        w: width,
+        h: height,
+        color: shadeColor(color, i * 10),
+      });
+    }
+
+    const circles = [];
+
+    for (let i = 0; i < numCircles; i++) {
+      let newCircle;
+      let overlaps;
+
+      do {
+        overlaps = false;
+        const { x, y, width, height, radius } = randomPositionAndSize(400, 400);
+        const color = mainColor;
+        newCircle = {
+          x: x + width / 2,
+          y: y + height / 2,
+          radius,
+          color: shadeColor(color, -i * 10),
+        } as any;
+
+        for (const circle of circles) {
+          if (isCircleOverlap(newCircle, circle)) {
+            overlaps = true;
+            break;
+          }
+        }
+      } while (overlaps);
+
+      circles.push(newCircle);
+      drawCircle({ ctx, ...newCircle });
+    }
+
+    for (let i = 0; i < numTexts; i++) {
+      const textLength = Math.floor(Math.random() * 10) + 5;
+      const text = getRandomText(textLength);
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
+      const fontSize = Math.floor(Math.random() * 20) + 10;
+      const c = Math.random() > 0.8 ? secondaryColor : mainColor;
+
+      const color = shadeColor(c, Math.floor(Math.random() * 20) - 10);
+
+      drawText({
+        ctx,
+        text,
+        x,
+        y,
+        fontSize,
+        color,
+        outline: true,
+        center: false,
+      });
+    }
+
+    ctx.font = `bold ${fontSize}px ${font}`;
+
+    const padding = 20;
+    const textX = padding;
+    const textY = canvas.height / 2;
+
+    drawText({
+      ctx,
+      text: title,
+      x: textX,
+      y: textY,
+      fontSize,
+      font,
+      color: extractLuminance(mainColor) > 0.5 ? "#2c2c2c" : "#e6e6e6",
+      outline: false,
+      gradient: false,
+      center: true,
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1365;
+    canvas.height = 768;
+    document.getElementById("container")?.appendChild(canvas);
+
+    const title = "Title"
+
+    generateColor;
+    hello(
+      canvas,
+      generateColor(),
+      title,
+      "Georgia",
+      64,
+    );
+  });
+</script>
+
+<BaseLayout
+  width={"w-fit"}
+  description={siteConfig.description}
+  image={siteConfig.image}
+>
+  <div class="text-xl my-16" id="container"></div>
+</BaseLayout>
