@@ -1,0 +1,84 @@
+---
+const { path, title, id } = Astro.props;
+---
+
+<style>
+  .image-wrapper {
+    cursor: pointer;
+    display: inline-block;
+  }
+
+  .image {
+    width: 100%;
+    height: auto;
+    transition: transform 0.3s ease;
+  }
+
+  .image:hover {
+    transform: scale(1.03);
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+
+  .modal img {
+    max-width: 90%;
+    max-height: 90%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+
+  .modal.show {
+    display: flex;
+  }
+
+  .close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+  }
+</style>
+
+<div class="image-wrapper" id={`image-wrapper-${id}`} onClick={() => {}}>
+  <img src={path} alt={title} title={title} class="image" />
+  <div text-gray-500 text-sm text-center w-full mt-4>{title}</div>
+</div>
+
+<div
+id={`modal-${id}`}
+  class="modal"
+  onClick={() => document.getElementById("modal").classList.remove("show")}
+>
+  <span class="close">&times;</span>
+  <div>
+    <img src={path} alt={title} />
+    <div text-white text-sm text-center w-full mt-4>{title}</div>
+  </div>
+</div>
+
+<script define:vars={{id}}>
+  const image = document.getElementById(`image-wrapper-${id}`);
+
+  image?.addEventListener("click", () => {
+    const elt = document.getElementById(`modal-${id}`);
+    elt?.classList.add("show");
+  });
+
+  const modal = document.getElementById(`modal-${id}`);
+
+  modal?.addEventListener("click", () => {
+    modal?.classList.remove("show");
+  });
+</script>

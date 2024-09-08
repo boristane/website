@@ -26,6 +26,7 @@
     "@baselime/edge-logger": "^0.3.2",
     "@unocss/reset": "^0.59.4",
     "astro": "^4.7.0",
+    "astro-expressive-code": "^0.36.1",
     "astro-seo": "^0.8.3",
     "drizzle-orm": "^0.30.10",
     "marked": "^12.0.2",
@@ -37,6 +38,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^2.16.0",
     "@cloudflare/workers-types": "^4.20240423.0",
+    "@expressive-code/plugin-line-numbers": "^0.36.1",
     "@iconify/json": "^2.2.204",
     "@types/ua-parser-js": "^0.7.39",
     "@vueuse/core": "^10.9.0",
