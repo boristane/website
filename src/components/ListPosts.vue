@@ -11,7 +11,8 @@ interface Post {
 }
 
 withDefaults(defineProps<{
-  list: Post[]
+  list: Post[],
+  mini?: boolean,
 }>(), {
   list: () => [],
 })
@@ -48,22 +49,26 @@ function getYear(date: Date | string | number) {
         nothing here yet.
       </div>
     </template>
-    <li v-for="(post, index) in list " :key="post.data.title" mb-6>
-      <div v-if="!isSameYear(post.data.date, list[index - 1]?.data.date)" select-none relative h18 pointer-events-none>
+    <li v-for="(post, index) in list " :key="post.data.title" :class="mini ? 'mb-4' : 'mb-6'">
+      <div v-if="!isSameYear(post.data.date, list[index - 1]?.data.date) && !mini" select-none relative h18
+        pointer-events-none>
         <span text-7em color-transparent font-bold text-stroke-2 absolute top--0.2em relative -z-10 op60
           class="text-stroke-[#eaeaea] dark:text-stroke-[#474747]">
           {{ getYear(post.data.date) }}
         </span>
       </div>
       <div text-lg lh-tight flex="~ col gap-1">
-        <a :target="getTarget(post)" :href="getHref(post)" nav-link text-2xl>
-          <span lh-normal>
-            <i v-if="post.data.draft" text-base vertical-mid i-ri-draft-line />
-            {{ post.data.title }}
-          </span>
-        </a>
-        <div text-gray-500 text-md>{{ post.data.description }}</div>
-        <div text-gray-500 text-sm ws-nowrap flex="~ gap-1 items-center" flex-wrap w-full>
+        <div flex="~ gap-1 items-center" flex-wrap :class="mini ? 'text-sm' : 'text-lg'">
+          <time w-32 :datetime="getDate(post.data.date)" v-if="mini" flex-none>{{ post.data.date }}</time>
+          <a :target="getTarget(post)" :href="getHref(post)" nav-link :class="mini ? 'text-lg prose-link text-wrap' : 'text-2xl'">
+            <span lh-normal>
+              <i v-if="post.data.draft" text-base vertical-mid i-ri-draft-line />
+              {{ post.data.title }}
+            </span>
+          </a>
+        </div>
+        <div text-gray-500 text-md v-if="!mini">{{ post.data.description }}</div>
+        <div text-gray-500 text-sm ws-nowrap flex="~ gap-1 items-center" flex-wrap w-full v-if="!mini">
           <time :datetime="getDate(post.data.date)">{{ post.data.date }}</time>
           <div v-if="post.data.location" flex="~ gap-1 items-center">
             <div>·</div>

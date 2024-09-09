@@ -2,6 +2,11 @@
 import { marked } from "marked";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import siteConfig from "../site-config";
+import ListPosts from "../components/ListPosts.vue";
+import { getPosts } from "../utils/posts";
+
+const posts = await getPosts("blog");
+const talks = await getPosts('talks')
 ---
 
 <script>
@@ -79,12 +84,12 @@ import siteConfig from "../site-config";
       }, interval);
     }
 
-    hello();
+    // hello();
   });
 </script>
 
 <BaseLayout description={siteConfig.description} image={siteConfig.image}>
-  <div class="text-xl mt-16">
+  <div class="text-xl mt-8">
     <div class="mb-8 text-3xl">
       <h1
         id="hello"
@@ -100,18 +105,34 @@ import siteConfig from "../site-config";
     </div>
     <div class="details">
       <p>
-        I currently work at <a
+        I build observability at <a
           href="https://cloudflare.com"
           class="prose-link"
           target="_blank"
           rel="noopener noreferrer">Cloudflare</a
-        >, where I focus on observability for the developer platform. I hangout
+        >. I hangout
         on <a
           href="https://twitter.com/BorisTane"
           rel="noopener noreferrer"
           class="prose-link">twitter</a
         > - hit me up, my dms are open!
       </p>
+    </div>
+    <div mt-16>
+      <h1
+        class="xl:text-7xl md:text-6xl text-5xl font-neucha text-[#eaeaea] dark:text-[#474747] relative -ml-2 -mb-4 xl:-ml-18 xl:-mb-8 -z-10"
+      >
+        blog
+      </h1>
+      <ListPosts list={posts as any[]} mini={true} />
+    </div>
+    <div mt-8>
+      <h1
+        class="xl:text-7xl md:text-6xl text-5xl font-neucha text-[#eaeaea] dark:text-[#474747] relative -ml-2 -mb-4 xl:-ml-18 xl:-mb-8 -z-10"
+      >
+        talks
+      </h1>
+      <ListPosts list={talks as any[]} mini={true} />
     </div>
   </div>
 </BaseLayout>
