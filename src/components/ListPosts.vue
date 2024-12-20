@@ -52,15 +52,15 @@ function getYear(date: Date | string | number) {
     <li v-for="(post, index) in list " :key="post.data.title" :class="mini ? 'mb-4' : 'mb-6'">
       <div v-if="!isSameYear(post.data.date, list[index - 1]?.data.date) && !mini" select-none relative h18
         pointer-events-none>
-        <span text-7em color-transparent font-bold text-stroke-2 absolute top--0.2em relative -z-10 op60
-          class="text-stroke-[#eaeaea] dark:text-stroke-[#474747]">
+        <span text-7em -ml-2 xl:-ml-18 absolute top--0.2em relative -z-10
+          class="font-neucha text-[#eaeaea] dark:text-[#474747]">
           {{ getYear(post.data.date) }}
         </span>
       </div>
       <div text-lg lh-tight flex="~ col gap-1">
-        <div flex="~ gap-1 items-center" flex-wrap :class="mini ? 'text-sm' : 'text-lg'">
+        <div flex="~ col" md:flex="~ row gap-1 items-center" flex-wrap :class="mini ? 'text-sm' : 'text-lg'">
           <time w-32 :datetime="getDate(post.data.date)" v-if="mini" flex-none>{{ post.data.date }}</time>
-          <a :target="getTarget(post)" :href="getHref(post)" nav-link :class="mini ? 'text-lg prose-link text-wrap' : 'text-2xl'">
+          <a :target="getTarget(post)" :href="getHref(post)" nav-link :class="mini ? 'text-lg text-link' : 'text-2xl'">
             <span lh-normal>
               <i v-if="post.data.draft" text-base vertical-mid i-ri-draft-line />
               {{ post.data.title }}

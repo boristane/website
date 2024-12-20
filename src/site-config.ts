@@ -5,7 +5,7 @@ export const siteConfig = {
   site: "https://boristane.com",
   image: {
     src: '/preview.png',
-    alt: "Hello, I'm Boris Tane",
+    alt: "Hi, I'm Boris Tane",
   },
   headerNavLinks: [
     {
@@ -27,8 +27,8 @@ export const siteConfig = {
   ],
   footerNavLinks: [
     {
-      text: 'twitter',
-      href: 'https://twitter.com/boristane',
+      text: 'bsky',
+      href: 'https://bsky.app/profile/boristane.bsky.social',
     },
     {
       text: 'github',
@@ -37,6 +37,10 @@ export const siteConfig = {
     {
       text: 'linkedin',
       href: 'https://www.linkedin.com/in/boristane/',
+    },
+    {
+      text: 'x',
+      href: 'https://x.com/boristane',
     },
   ],
 }
