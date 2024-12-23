@@ -5,7 +5,7 @@ export const siteConfig = {
   site: "https://boristane.com",
   image: {
     src: '/preview.png',
-    alt: "Hi, I'm Boris Tane",
+    alt: "Hello, I'm Boris Tane",
   },
   headerNavLinks: [
     {
@@ -39,7 +39,7 @@ export const siteConfig = {
       href: 'https://www.linkedin.com/in/boristane/',
     },
     {
-      text: 'x',
+      text: 'x (twitter)',
       href: 'https://x.com/boristane',
     },
   ],
