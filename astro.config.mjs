@@ -19,11 +19,12 @@ export default defineConfig({
   }),
   integrations: [
     expressiveCode({
-      themes:['material-theme-ocean'],
+      themes:['rose-pine-dawn'],
       plugins: [pluginLineNumbers()],
       styleOverrides: {
         frames: {
           // shadowColor: '#fff',
+          frameBoxShadowCssValue: '',
         },
       },
     }),
