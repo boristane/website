@@ -70,6 +70,7 @@ function formatCanonicalURL(url: string | URL) {
         name: "twitter:image",
         content: resolvedImage?.src,
       },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Boris Tane" },
       { name: "twitter:description", content: "Boris Tane" },
     ],

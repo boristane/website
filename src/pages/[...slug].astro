@@ -6,7 +6,7 @@ import type { CollectionPages } from '../types'
 export const prerender = true;
 export async function getStaticPaths() {
   const pages = await getCollection('pages')
-  return pages.map((page) => {
+  return pages.map((page: any) => {
     return {
       params: { slug: page.slug },
       props: { page },
@@ -16,7 +16,7 @@ export async function getStaticPaths() {
 
 type Props = { page: CollectionPages }
 
-const { page } = Astro.props
+const { page } = Astro.props as any
 const { title, description, image } = page.data
 const { Content } = await page.render()
 ---

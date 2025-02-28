@@ -63,7 +63,7 @@ const { path, title, id } = Astro.props;
 <div
 id={`modal-${id}`}
   class="modal"
-  onClick={() => document.getElementById("modal").classList.remove("show")}
+  onClick={() => document.getElementById("modal")?.classList.remove("show")}
 >
   <span class="close">&times;</span>
   <div>

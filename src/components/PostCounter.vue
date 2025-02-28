@@ -23,10 +23,6 @@ onMounted(async () => {
     slug: props?.slug,
     referrer: document.referrer
   });
-
-  await fetch(`${basePath}/api/collect?${params}`, {
-    method: "GET",
-  });
 })
 </script>
 

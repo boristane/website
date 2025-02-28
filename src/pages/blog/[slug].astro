@@ -25,11 +25,9 @@ if (post === undefined) {
   return new Response(JSON.stringify(await getAllPosts()));
 }
 
-const allPosts = (await getPosts('blog')) as any[];
+const allPosts = (await getPosts("blog")) as any[];
 let next = undefined as any;
-const postIndex = allPosts.findIndex(
-  (p) => p.slug === post.slug,
-);
+const postIndex = allPosts.findIndex((p) => p.slug === post.slug);
 if (postIndex >= allPosts.length - 1 || postIndex < 0) {
   next = {
     collection: post.collection,
@@ -42,7 +40,6 @@ if (postIndex >= allPosts.length - 1 || postIndex < 0) {
   };
 }
 
-
 const { title, image, description, date, tags, location } = post.data;
 const { Content } = await post.render();
 ---
@@ -50,7 +47,10 @@ const { Content } = await post.render();
 <BaseLayout
   title={title}
   description={description}
-  image={image}
+  image={{
+    src: `${import.meta.env.SITE}/assets/blog/${post.slug}/og.png`,
+    alt: title,
+  }}
   pageType="article"
   pageOperate={true}
   comments={true}
@@ -63,7 +63,9 @@ const { Content } = await post.render();
       <h1 class="text-title">
         {title}
       </h1>
-      <div class="flex items-center gap-2 text-main text-gray-400 mt-4 flex-wrap">
+      <div
+        class="flex items-center gap-2 text-main text-gray-400 mt-4 flex-wrap"
+      >
         <div class="flex-none">{date}</div>
         {
           location && (
@@ -83,11 +85,7 @@ const { Content } = await post.render();
         }
       </div>
     </header>
-    <PostCounter
-      type={"blog"}
-      slug={post?.slug}
-      client:load
-    />
+    <PostCounter type={"blog"} slug={post?.slug} client:load />
     <div class="max-w-none prose">
       <Content />
     </div>

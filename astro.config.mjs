@@ -5,6 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import UnoCSS from 'unocss/astro';
 import vue from '@astrojs/vue';
 
+
 import expressiveCode from "astro-expressive-code";
 import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers'
 
@@ -14,32 +15,24 @@ export default defineConfig({
   output: "server",
   adapter: cloudflare({
     platformProxy: {
-      enabled: true
-    }
+      enabled: true,
+    },
+    wasmModuleImports: true
   }),
   integrations: [
     expressiveCode({
-      themes:['rose-pine-dawn'],
+      themes: ['rose-pine-dawn'],
       plugins: [pluginLineNumbers()],
       styleOverrides: {
         frames: {
-          // shadowColor: '#fff',
           frameBoxShadowCssValue: '',
         },
       },
     }),
     mdx(), sitemap(),
     UnoCSS({
-    injectReset: true
-  }), vue(), 
+      injectReset: true
+    }),
+    vue(),
   ],
-  markdown: {
-    shikiConfig: {
-      themes: {
-        light: 'vitesse-light',
-        dark: 'vitesse-dark'
-      },
-      wrap: true
-    }
-  }
 });

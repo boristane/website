@@ -30,7 +30,7 @@ async function getRepoStars(repo: string): Promise<number | null> {
 function getDate(date: string) {
   const d = new Date(date);
   const options = { year: "numeric", month: "long" };
-  const formatter = new Intl.DateTimeFormat("en-US", options);
+  const formatter = new Intl.DateTimeFormat("en-US", options as any);
   return formatter.format(d);
 }
 

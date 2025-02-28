@@ -47,7 +47,10 @@ const { Content } = await (post as any).render();
 <BaseLayout
   title={title}
   description={description}
-  image={image}
+  image={{
+    src: `${import.meta.env.SITE}/assets/blog/${post.slug}/og.png`,
+    alt: title,
+  }}
   pageType="article"
   pageOperate={true}
   comments={true}
