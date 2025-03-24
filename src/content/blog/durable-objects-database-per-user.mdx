@@ -1,7 +1,7 @@
 ---
 title: "Cloudflare Workers 101: One Database Per User with Cloudflare Durable Objects and Drizzle ORM"
 description: Using Durable Objects and Drizzle ORM to create isolated SQLite databases for each user in a Hono app
-date: 2025-03-23
+date: 2025-03-24
 tags:
   - cloudflare dev 101
   - cloudflare workers
@@ -15,7 +15,7 @@ I'm building a production-ready app entirely on the [Cloudflare Developers Platf
 
 Today, I'm focusing on a specific pattern that's surprisingly simple to implement: creating one isolated database per user using Durable Objects and Drizzle ORM.
 
-[Durable Objects](https://www.cloudflare.com/developer-platform/products/durable-objects/) are one of the most powerful primitives in the Cloudflare Developer Platform. I have seen many people struggle to define Durable Objects. I see them as **mini servers without the ops**.
+[Durable Objects](https://www.cloudflare.com/developer-platform/products/durable-objects/) are one of the most powerful primitives on the Cloudflare Developer Platform, but I have seen many people struggle to define them. I see them as **mini servers without the ops**.
 
 Each object (server) is:
 
@@ -32,10 +32,10 @@ Durable Objects provide a convenient [SQLite API](https://blog.cloudflare.com/sq
 
 Before looking at implementation, let's understand why you might want one database per user:
 
-1. **Scalability** - Sharding a database in one instance per user addresses the limitations of storing and managing large datasets on a single database server or instance
+1. **Scalability** - Sharding a database into one instance per user addresses the limitations of storing and managing large datasets on a single database server
 2. **True isolation** - Each user's data is completely isolated
 3. **Simplified access control** - No complex filtering or multi-tenancy code
-4. **Performance** - Durable Objects are distributed globally, and instanciated closest to the first request they receive. As such, each database will be instanciated closes to its uers, significantly reducing end-to-end latency
+4. **Performance** - Durable Objects are distributed globally, and instanciated closest to the first request they receive. As such, each database will be instanciated closes to its users, significantly reducing end-to-end latency
 
 In this example, we'll build a simple notes API where each user gets their own SQLite database. A user can create, read, list, or delete notes. They will be able to interact exclusively with their own database. By definition, a user will not be able to access another user's data.
 
@@ -110,7 +110,7 @@ After creating a Node.js project with `npm` and configuring TypeScript, let's cr
 
 Our Worker script name will be `durable-objects-database-per-user`, it will have a `worker.dev` URL, and observability enabled. Our Durable Object class will be `DurableDatabase` and we enabled the Durable Object SQLite API on it. 
 
-Next. let's write the code for our Worker and our Durable Objects.
+Next, let's write the code for our Worker and our Durable Objects.
 
 ```ts title="src/index.ts"
 import { DurableObject } from 'cloudflare:workers';
@@ -600,14 +600,20 @@ This is the core of our "one database per user" pattern. By using `idFromName(us
 
 ## Testing It Out
 
-Now let's see how our "one database per user" pattern works in practice. After you have deployed your Worker using `wrangler`, you'll get a URL for your Worker: `https://durable-objects-database-per-user.<account-name>.workers.dev`, where `<account-name>` is the name of your account.
+Now let's see how our "one database per user" pattern works in practice. After you have deployed your Worker using `wrangler`, you'll get a URL for your Worker:
+
+```txt
+https://durable-objects-database-per-user.account-name.workers.dev
+```
+
+ where `account-name` is the name of your account.
 
 Here are some example API calls:
 
 #### Creating a note for user "john"
 
 ```bash
-curl -X POST https://durable-objects-database-per-user.<account-name>.workers.dev/john \
+curl -X POST https://durable-objects-database-per-user.account-name.workers.dev/john \
   -H "Content-Type: application/json" \
   -d '{"text":"Buy groceries"}'
 
@@ -625,7 +631,7 @@ curl -X POST https://durable-objects-database-per-user.<account-name>.workers.de
 #### Listing all notes for "john"
 
 ```bash
-curl https://durable-objects-database-per-user.<account-name>.workers.dev/john
+curl https://durable-objects-database-per-user.account-name.workers.dev/john
 
 # Response:
 # {
@@ -643,7 +649,7 @@ curl https://durable-objects-database-per-user.<account-name>.workers.dev/john
 #### Creating a note for user "bob"
 
 ```bash
-curl -X POST https://durable-objects-database-per-user.<account-name>.workers.dev/bob \
+curl -X POST https://durable-objects-database-per-user.account-name.workers.dev/bob \
   -H "Content-Type: application/json" \
   -d '{"text":"Finish the report"}'
 
@@ -661,7 +667,7 @@ curl -X POST https://durable-objects-database-per-user.<account-name>.workers.de
 #### Listing all notes for "bob"
 
 ```bash
-curl https://durable-objects-database-per-user.<account-name>.workers.dev/bob
+curl https://durable-objects-database-per-user.account-name.workers.dev/bob
 
 # Response:
 # {
