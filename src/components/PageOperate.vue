@@ -53,7 +53,7 @@ function toTop() {
           </div>
         </a>
       </div>
-      <div v-if="tags && tags.length" flex="~ gap-2 items-center" mb-2>
+      <div v-if="tags && tags.length" flex="~ gap-2 " mb-2>
         <i i-ri-arrow-right-s-line flex-none />
         <span>grep</span>
         <ListTags :tags="tags" />

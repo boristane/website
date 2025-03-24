@@ -1,0 +1,688 @@
+---
+title: "Cloudflare Workers 101: One Database Per User with Cloudflare Durable Objects and Drizzle ORM"
+description: Using Durable Objects and Drizzle ORM to create isolated SQLite databases for each user in a Hono app
+date: 2025-03-23
+tags:
+  - cloudflare dev 101
+  - cloudflare workers
+  - cloudflare durable objects
+  - drizzle orm
+---
+
+import BlogImage from '../../components/BlogImage.astro';
+
+I'm building a production-ready app entirely on the [Cloudflare Developers Platform](https://workers.dev) ([Basebrain](https://basebrain.ai)) and I want to share implementation details of the key patterns I use.
+
+Today, I'm focusing on a specific pattern that's surprisingly simple to implement: creating one isolated database per user using Durable Objects and Drizzle ORM.
+
+[Durable Objects](https://www.cloudflare.com/developer-platform/products/durable-objects/) are one of the most powerful primitives in the Cloudflare Developer Platform. I have seen many people struggle to define Durable Objects. I see them as **mini servers without the ops**.
+
+Each object (server) is:
+
+- Addressable by a unique name/ID, like a key in a distributed system.
+- Run in a single location at any given time, so no race conditions.
+- Can store persistent state, backed by Durable Object Storage.
+- Can coordinate between multiple clients, like a chat room, game session, or rate limiter.
+
+They're great when you need strong consistency, low-latency coordination, or lightweight stateful logic.
+
+Durable Objects provide a convenient [SQLite API](https://blog.cloudflare.com/sqlite-in-durable-objects/), and when combined with Drizzle ORM, give you a clean, type-safe way to create a database per user in your applications.
+
+## One Database Per User
+
+Before looking at implementation, let's understand why you might want one database per user:
+
+1. **Scalability** - Sharding a database in one instance per user addresses the limitations of storing and managing large datasets on a single database server or instance
+2. **True isolation** - Each user's data is completely isolated
+3. **Simplified access control** - No complex filtering or multi-tenancy code
+4. **Performance** - Durable Objects are distributed globally, and instanciated closest to the first request they receive. As such, each database will be instanciated closes to its uers, significantly reducing end-to-end latency
+
+In this example, we'll build a simple notes API where each user gets their own SQLite database. A user can create, read, list, or delete notes. They will be able to interact exclusively with their own database. By definition, a user will not be able to access another user's data.
+
+The complete code for this tutorial is available on [GitHub](https://github.com/boristane/cloudflare-dev-101/tree/main/durable-objects-database-per-user).
+
+Throughout this example, we'll assume you're familiar with deploying [Cloudflare Workers](https://developers.cloudflare.com/workers/) and we will focus on Durable Objects.
+
+## Project Overview
+
+Let's start with an overview of the project. We'll be using:
+
+- [**Cloudflare Workers**](https://developers.cloudflare.com/workers/) - Our serverless platform
+- [**Durable Objects**](https://developers.cloudflare.com/durable-objects/) - To maintain per-user databases
+- [**Drizzle ORM**](https://orm.drizzle.team/) - For type-safe database operations
+- [**Hono**](https://hono.dev/) - A lightweight framework for our API routes
+
+Here's the basic structure of the project:
+
+```
+.
+├── bindings.ts                # Bindings TypeScript Definition
+├── package.json               # Dependencies and scripts
+├── src
+│   ├── db                     # Database-related code
+│   │   ├── index.ts           # CRUD operations
+│   │   ├── notes.ts           # Schema definition
+│   │   ├── schemas.ts         # Schema exports
+│   │   └── types.ts           # TypeScript types
+│   └── index.ts               # Main Worker code and Durable Object
+├── tsconfig.json              # TypeScript configuration
+└── wrangler.json              # Cloudflare Workers configuration
+```
+
+## Bootstrapping the Durable Object
+
+Let's start with bootstrapping our Durable Object code.
+
+Each Durable Object is part of a [Durable Object Namespace](https://developers.cloudflare.com/durable-objects/api/namespace/). A Durable Object Namespace is how you reference a Durable Object class from your Worker. It's like a binding that lets you create or execute methods in the Durable Objects from your Worker. A Durable Object Namespace must be bound to your Worker before you can instanciate Durable Objects.
+
+After creating a Node.js project with `npm` and configuring TypeScript, let's create our `wrangler.json` file to configure our Worker and Durable Object Namespace.
+
+
+```json title="wrangler.json"
+{
+  "name": "durable-objects-database-per-user",
+  "compatibility_date": "2024-11-12",
+  "workers_dev": true,
+  "upload_source_maps": true,
+  "observability": {
+    "enabled": true
+  },
+  "main": "./src/index.ts",
+  "migrations": [
+    {
+      "new_sqlite_classes": [
+        "DurableDatabase"
+      ],
+      "tag": "v1"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "class_name": "DurableDatabase",
+        "name": "DurableDatabase"
+      }
+    ]
+  }
+}
+
+```
+
+Our Worker script name will be `durable-objects-database-per-user`, it will have a `worker.dev` URL, and observability enabled. Our Durable Object class will be `DurableDatabase` and we enabled the Durable Object SQLite API on it. 
+
+Next. let's write the code for our Worker and our Durable Objects.
+
+```ts title="src/index.ts"
+import { DurableObject } from 'cloudflare:workers';
+import { Hono } from 'hono'
+import { Bindings } from '../bindings';
+
+const app = new Hono<{ Bindings: Bindings }>();
+
+app.get('/', async (c) => {
+  return c.json({ message: "Hello World!" })
+});
+
+export default {
+  async fetch(request: Request, env: Bindings, ctx: ExecutionContext): Promise<Response> {
+    return app.fetch(request, env, ctx);
+  },
+};
+
+export class DurableDatabase extends DurableObject {
+  constructor(ctx: DurableObjectState, env: Bindings) {
+    super(ctx, env);
+  }
+}
+```
+
+It's a Hono API, and the `DurableDatabase` doesn't do anything yet. We will come back to implement its methods.
+
+We import `Bindings` from our bindings definition file. The `Bindings` type enables us to have type-safety and auto-completion when interacting with resources bound to the Worker.
+
+
+```typescript title="src/bindings.ts"
+import type { DurableDatabase } from "./src/index.ts";
+
+export type Bindings = {
+  DurableDatabase: DurableObjectNamespace<DurableDatabase>;
+};
+```
+We are pointing out to TypeScript that there's a Durable Object Namespace called `DurableDatabase` implementing the Durable Object class `DurableDatabase` bound to our Worker.
+
+## Database Schema
+
+Now let's define our database schema. Let's keep it simple: a note has an ID, a text content, and created and updated timestamps.
+
+We use the `sqliteTable` function from Drizzle ORM to create schema for our table:
+
+```ts title="src/db/notes.ts"
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+
+export const notes = sqliteTable(
+  "notes",
+  {
+    id: text("id")
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => `note_${randomString()}`),
+    
+    text: text("text").notNull(),
+    
+    created: integer("created", { mode: "timestamp_ms" })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updated: integer("updated", { mode: "timestamp_ms" })
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+);
+
+// Helper to generate random IDs for our notes
+function randomString(length = 16): string {
+  const chars = "abcdefghijklmnopqrstuvwxyz";
+  const resultArray = new Array(length);
+
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * chars.length);
+    resultArray[i] = chars[randomIndex];
+  }
+
+  return resultArray.join("");
+}
+```
+
+Alongside our schemas, we need to define the TypeScript types of notes saved in the database. We can infer those from the schema thanks to Drizzle `$infer` properties.
+
+```ts title="src/db/types.ts"
+import type * as schema from "./schemas";
+import { notes } from "./notes";
+
+export type Note = typeof notes.$inferSelect;
+export type InsertNote = typeof notes.$inferInsert;
+```
+
+We also create a type for our Database, such that we can easily use it when making database operations.
+
+```ts title="src/db/types.ts" ins={1,5}
+import type { DrizzleSqliteDODatabase } from "drizzle-orm/durable-sqlite";
+import type * as schema from "./schemas";
+import { notes } from "./notes";
+
+export type DB = DrizzleSqliteDODatabase<typeof schema>;
+
+export type Note = typeof notes.$inferSelect;
+export type InsertNote = typeof notes.$inferInsert;
+```
+
+And we export all the schemas in a single file.
+
+
+```ts title="src/db/schemas.ts"
+export * from "./notes";
+```
+
+## Database Operations
+
+Now that we have a schema, let's create the functions that will interact with our database. These will be the core operations our Durable Object will expose. Each use should have the ability to create a new note, delete a note by ID, get a specific note by ID, and list all notes.
+
+```typescript title="src/db/index.ts"
+import { eq } from "drizzle-orm";
+import { notes } from "./notes";
+import { DB, InsertNote, Note } from "./types";
+
+// Create a new note
+export async function create(db: DB, note: InsertNote): Promise<Note> {
+  const [res] = await db
+    .insert(notes)
+    .values(note)
+    .onConflictDoUpdate({
+      target: [notes.id],
+      set: note,
+    })
+    .returning();
+
+  return res;
+}
+
+// Delete a note by ID
+export async function del(db: DB, params: { id: string }): Promise<Note> {
+  const [note] = await db
+    .delete(notes)
+    .where(eq(notes.id, params.id))
+    .returning();
+  return note;
+}
+
+// Get a note by ID
+export async function get(db: DB, params: { id: string }): Promise<Note | null> {
+  const [result] = await db
+    .select()
+    .from(notes)
+    .where(eq(notes.id, params.id));
+  if (!result) return null;
+  return result;
+}
+
+// List all notes
+export async function list(db: DB): Promise<Note[]> {
+  const ns = await db
+    .select()
+    .from(notes)
+  return ns;
+}
+```
+
+These operations are using fairly standard Drizzle's query builder API functions, it gives us a clean, fluent interface for building SQL queries.
+
+## Implementing the Durable Object
+
+Now let's look at how we implement our Durable Object. This is where the magic happens - each Durable Object instance will be tied to a specific user and contain their own SQLite database.
+
+```typescript title="src/index.ts" ins={4-5,7,22,26-27,29-44}
+import { DurableObject } from 'cloudflare:workers';
+import { Hono } from 'hono'
+import { Bindings } from '../bindings';
+import { drizzle } from 'drizzle-orm/durable-sqlite';
+import * as schema from "./db/schemas";
+
+import { DB } from './db/types';
+
+const app = new Hono<{ Bindings: Bindings }>();
+
+app.get('/', async (c) => {
+  return c.json({ message: "Hello World!" })
+});
+
+export default {
+  async fetch(request: Request, env: Bindings, ctx: ExecutionContext): Promise<Response> {
+    return app.fetch(request, env, ctx);
+  },
+};
+
+export class DurableDatabase extends DurableObject {
+  private db: DB;
+  
+  constructor(ctx: DurableObjectState, env: Bindings) {
+    super(ctx, env);
+    // Initialize Drizzle with the Durable Object's storage
+    this.db = drizzle(ctx.storage, { schema, logger: true });
+  }
+
+  async notesCreate(note: Parameters<typeof notes.create>[1]): ReturnType<typeof notes.create> {
+    return await notes.create(this.db, note);
+  }
+
+  async notesGet(params: Parameters<typeof notes.get>[1]): ReturnType<typeof notes.get> {
+    return await notes.get(this.db, params);
+  }
+
+  async notesList(): ReturnType<typeof notes.list> {
+    return await notes.list(this.db);
+  }
+
+  async notesDel(params: Parameters<typeof notes.get>[1]): ReturnType<typeof notes.del> {
+    return await notes.del(this.db, params);
+  }
+}
+```
+
+Let's break down what's happening here:
+
+1. In the constructor, we initialize Drizzle with `ctx.storage`, which is the Durable Object's built-in storage that SQLite operates on. This gives us a `DrizzleSqliteDODatabase` which is unique per Durable Object. Everytime we do an operation using this object, we are interacting with a single SQLite instance.
+
+2. We use `blockConcurrencyWhile` to run migrations before accepting any requests. This ensures our database schema is up-to-date.
+
+3. We create methods that map directly to our database operations. These methods will be called from our API routes.
+
+The key insight here is that each instance of our `DurableDatabase` class is completely isolated from other instances. When we create a Durable Object for a user, they get their own private database.
+
+## Database Migrations
+
+Database migration for Durable Object SQLite can be confusing, but the key thing to understand is that migrations must be run in the constructor of the Durable Object class.
+
+Durable Object constructors run when a request is routed to an instance that isn't currently active - basically on cold start. When you try to access a specific Durable Object from a Worker using its name/ID, if the Durable Object for that ID isn't already in memory somewhere in Cloudflare's edge network, a new instance spins up and the constructor is run once.
+
+After that, the object stays warm for a while (usually minutes of inactivity) before being evicted from memory. If another request comes in later, the object will spin up again and the constructor is called again.
+
+It then makes sense to run migrations in the Durable Object class constructor. When a new request is routed to a specific Durable Objects, the migration files since the last migration will be run in the constructor. This enables doing migrations on potentially millions of Durable Objects, "just-in-time".
+
+```typescript title="src/index.ts" ins={5-6,30-34,52-55}
+import { DurableObject } from 'cloudflare:workers';
+import { Hono } from 'hono'
+import { Bindings } from '../bindings';
+import { drizzle } from 'drizzle-orm/durable-sqlite';
+import { migrate } from 'drizzle-orm/durable-sqlite/migrator';
+import migrations from '../drizzle/migrations';
+import * as schema from "./db/schemas";
+
+import { DB } from './db/types';
+
+const app = new Hono<{ Bindings: Bindings }>();
+
+app.get('/', async (c) => {
+  return c.json({ message: "Hello World!" })
+});
+
+export default {
+  async fetch(request: Request, env: Bindings, ctx: ExecutionContext): Promise<Response> {
+    return app.fetch(request, env, ctx);
+  },
+};
+
+export class DurableDatabase extends DurableObject {
+  private db: DB;
+  
+  constructor(ctx: DurableObjectState, env: Bindings) {
+    super(ctx, env);
+    // Initialize Drizzle with the Durable Object's storage
+    this.db = drizzle(ctx.storage, { schema, logger: true });
+    
+    // Run migrations before accepting any requests
+    ctx.blockConcurrencyWhile(async () => {
+      await this._migrate();
+    });
+  }
+
+  async notesCreate(note: Parameters<typeof notes.create>[1]): ReturnType<typeof notes.create> {
+    return await notes.create(this.db, note);
+  }
+
+  async notesGet(params: Parameters<typeof notes.get>[1]): ReturnType<typeof notes.get> {
+    return await notes.get(this.db, params);
+  }
+
+  async notesList(): ReturnType<typeof notes.list> {
+    return await notes.list(this.db);
+  }
+
+  async notesDel(params: Parameters<typeof notes.get>[1]): ReturnType<typeof notes.del> {
+    return await notes.del(this.db, params);
+  }
+
+  private async _migrate() {
+    await migrate(this.db, migrations);
+  }
+}
+```
+
+You're asking yourself what is the `migrations` we import from `../drizzle/migrations`. These are database migration files created by [Drizzle Kit](https://orm.drizzle.team/docs/kit-overview). Drizzle Kit is a CLI tool for managing SQL database migrations with Drizzle.
+
+Let's define our Drizzle config with the `durable-sqlite` driver.
+
+```ts title="drizzle.config.ts"
+import { defineConfig } from 'drizzle-kit';
+
+export default defineConfig({
+  out: './drizzle',
+  schema: './src/db/schemas.ts',
+  dialect: 'sqlite',
+  driver: 'durable-sqlite',
+});
+```
+
+To create the migration files, it's necessary to run the Drizzle Kit `generate` command:
+
+```bash
+drizzle-kit generate
+```
+
+This command will create a new folder `drizzle` in our project structure, which will keep track of all our migrations. After every change to our database schema, we need to run the same command to generate migration files.
+
+These migration files need to be uploaded alongside our Worker code, such that they can be run on Durable Object cold-starts. However, [`wrangler`](https://developers.cloudflare.com/workers/wrangler/), the Cloudflare Developer Platform command-line interface, only uploads files it generates when bundling a project. It is necessary to explicitely require migration files to be uploaded alongside the Worker code.
+
+```json title="wrangler.json" ins={18-26}
+{
+  "name": "durable-objects-database-per-user",
+  "compatibility_date": "2024-11-12",
+  "workers_dev": true,
+  "upload_source_maps": true,
+  "observability": {
+    "enabled": true
+  },
+  "main": "./src/index.ts",
+  "migrations": [
+    {
+      "new_sqlite_classes": [
+        "DurableDatabase"
+      ],
+      "tag": "v1"
+    }
+  ],
+  "rules": [
+    {
+      "type": "Text",
+      "globs": [
+        "**/*.sql"
+      ],
+      "fallthrough": true
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "class_name": "DurableDatabase",
+        "name": "DurableDatabase"
+      }
+    ]
+  }
+}
+```
+
+The `rules` section tells Wrangler to include all `.sql` files in our deployment. Without this rule, our SQL migration files wouldn't be included in the deployment, and our migrations would fail.
+
+## Setting Up API Routes
+
+Now let's set up our API routes to interact with our Durable Objects.
+
+```typescript title="src/index.ts" ins={23-65}
+import { DurableObject } from 'cloudflare:workers';
+import { Hono } from 'hono'
+import { Bindings } from '../bindings';
+import { drizzle } from 'drizzle-orm/durable-sqlite';
+import { migrate } from 'drizzle-orm/durable-sqlite/migrator';
+import migrations from '../drizzle/migrations';
+import * as schema from "./db/schemas";
+import * as notes from "./db/index";
+
+import { DB } from './db/types';
+
+const app = new Hono<{ Bindings: Bindings }>();
+
+app.get('/', async (c) => {
+  return c.json({ message: "Hello World!" })
+});
+
+export default {
+  async fetch(request: Request, env: Bindings, ctx: ExecutionContext): Promise<Response> {
+    return app.fetch(request, env, ctx);
+  },
+};
+
+async function getDurableDatabaseStub(env: Bindings, userId: string) {
+  const doId = env.DurableDatabase.idFromName(userId);
+  return await env.DurableDatabase.get(doId);
+} 
+
+// Create a note for a user
+app.post('/:userId', async (c) => {
+  const userId = c.req.param("userId");
+  const { text } = await c.req.json();
+  const stub = await getDurableDatabaseStub(c.env, userId);
+  const note = await stub.notesCreate({ text });
+  return c.json({ note })
+});
+
+// List all notes for a user
+app.get('/:userId', async (c) => {
+  const userId = c.req.param("userId");
+  const stub = await getDurableDatabaseStub(c.env, userId);
+  const notes = await stub.notesList()
+  return c.json({ notes })
+});
+
+// Get a specific note for a user
+app.get('/:userId/:noteId', async (c) => {
+  const userId = c.req.param("userId");
+  const noteId = c.req.param("noteId");
+  const stub = await getDurableDatabaseStub(c.env, userId);
+  const note = await stub.notesGet({ id: noteId });
+  if (!note) {
+    return c.notFound();
+  }
+  return c.json({ note })
+});
+
+// Delete a note for a user
+app.delete('/:userId/:noteId', async (c) => {
+  const userId = c.req.param("userId");
+  const noteId = c.req.param("noteId");
+  const stub = await getDurableDatabaseStub(c.env, userId);
+  const note = await stub.notesDel({ id: noteId });
+  return c.json({ note })
+});
+
+export class DurableDatabase extends DurableObject {
+  private db: DB;
+  
+  constructor(ctx: DurableObjectState, env: Bindings) {
+    super(ctx, env);
+    // Initialize Drizzle with the Durable Object's storage
+    this.db = drizzle(ctx.storage, { schema, logger: true });
+    
+    // Run migrations before accepting any requests
+    ctx.blockConcurrencyWhile(async () => {
+      await this._migrate();
+    });
+  }
+
+  async notesCreate(note: Parameters<typeof notes.create>[1]): ReturnType<typeof notes.create> {
+    return await notes.create(this.db, note);
+  }
+
+  async notesGet(params: Parameters<typeof notes.get>[1]): ReturnType<typeof notes.get> {
+    return await notes.get(this.db, params);
+  }
+
+  async notesList(): ReturnType<typeof notes.list> {
+    return await notes.list(this.db);
+  }
+
+  async notesDel(params: Parameters<typeof notes.get>[1]): ReturnType<typeof notes.del> {
+    return await notes.del(this.db, params);
+  }
+
+  private async _migrate() {
+    await migrate(this.db, migrations);
+  }
+}
+```
+
+The key pattern in each route is:
+
+- Extract the `userId` from the URL
+- Get a Durable Object ID using `idFromName(userId)`
+- Get a stub to the Durable Object using `get(doId)`
+- Call methods on the stub to interact with the user's database
+
+A durable object stub is the proxy we use to send requests to a specific Durable Object instance. We get the Durable Object ID from the `userId`, and we use it to instanciate a lightweight proxy object (the stub).
+
+```ts
+async function getDurableDatabaseStub(env: Bindings, userId: string) {
+  const doId = env.DurableDatabase.idFromName(userId);
+  return await env.DurableDatabase.get(doId);
+} 
+```
+
+With the stub, we can call methods on the Durable Object using [JavaScript-native RPC](https://blog.cloudflare.com/javascript-native-rpc/). That's how we're able to call the `notesCreate`, `notesGet`, `notesDel`, and `notesList` methods in the Durable Object.
+
+This is the core of our "one database per user" pattern. By using `idFromName(userId)`, we're creating a consistent mapping from user IDs to Durable Objects. Each user gets their own Durable Object, and thus their own database.
+
+## Testing It Out
+
+Now let's see how our "one database per user" pattern works in practice. After you have deployed your Worker using `wrangler`, you'll get a URL for your Worker: `https://durable-objects-database-per-user.<account-name>.workers.dev`, where `<account-name>` is the name of your account.
+
+Here are some example API calls:
+
+#### Creating a note for user "john"
+
+```bash
+curl -X POST https://durable-objects-database-per-user.<account-name>.workers.dev/john \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Buy groceries"}'
+
+# Response:
+# {
+#   "note": {
+#     "id": "note_jxqegmbonzvdstpy",
+#     "text": "Buy groceries",
+#     "created": "2025-03-23T15:42:18.760Z",
+#     "updated": "2025-03-23T15:42:18.760Z"
+#   }
+# }
+```
+
+#### Listing all notes for "john"
+
+```bash
+curl https://durable-objects-database-per-user.<account-name>.workers.dev/john
+
+# Response:
+# {
+#   "notes": [
+#     {
+#       "id": "note_jxqegmbonzvdstpy",
+#       "text": "Buy groceries",
+#       "created": "2025-03-23T15:42:18.760Z",
+#       "updated": "2025-03-23T15:42:18.760Z"
+#     }
+#   ]
+# }
+```
+
+#### Creating a note for user "bob"
+
+```bash
+curl -X POST https://durable-objects-database-per-user.<account-name>.workers.dev/bob \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Finish the report"}'
+
+# Response:
+# {
+#   "note": {
+#     "id": "note_lnkcpfqyrtzbmags",
+#     "text": "Finish the report",
+#     "created": "2025-03-23T15:43:05.120Z",
+#     "updated": "2025-03-23T15:43:05.120Z"
+#   }
+# }
+```
+
+#### Listing all notes for "bob"
+
+```bash
+curl https://durable-objects-database-per-user.<account-name>.workers.dev/bob
+
+# Response:
+# {
+#   "notes": [
+#     {
+#       "id": "note_lnkcpfqyrtzbmags",
+#       "text": "Finish the report",
+#       "created": "2025-03-23T15:43:05.120Z",
+#       "updated": "2025-03-23T15:43:05.120Z"
+#     }
+#   ]
+# }
+```
+
+The key insight here is that "john" and "bob" have completely separate databases.
+
+## Limitations and Considerations
+
+While this pattern is powerful, there are a few things to keep in mind:
+
+1. **Storage Limits** - Each Durable Object has a storage limit (currently 1GB), which could be limiting and push us to further sharding depending on the scale of our app
+2. **Cross-User Operations** - Queries across multiple users' data, for example back-office queries or analytics, require additional work
+
+On [Basebrain](https://basebrain.ai), I'm going around these with further sharding and by using a different database for analytics, [Workers Analytics Engine](https://blog.cloudflare.com/workers-analytics-engine/).

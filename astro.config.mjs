@@ -21,7 +21,7 @@ export default defineConfig({
   }),
   integrations: [
     expressiveCode({
-      themes: ['rose-pine-dawn'],
+      themes: ['github-dark'],
       plugins: [pluginLineNumbers()],
       styleOverrides: {
         frames: {
