@@ -1,5 +1,5 @@
 ---
-title: "Cloudflare Workers 101: One Database Per User with Cloudflare Durable Objects and Drizzle ORM"
+title: "One Database Per User with Cloudflare Durable Objects and Drizzle ORM"
 description: Using Durable Objects and Drizzle ORM to create isolated SQLite databases for each user in a Hono app
 date: 2025-03-24
 tags:
@@ -277,7 +277,7 @@ These operations are using fairly standard Drizzle's query builder API functions
 
 ## Implementing the Durable Object
 
-Now let's look at how we implement our Durable Object. This is where the magic happens - each Durable Object instance will be tied to a specific user and contain their own SQLite database.
+Now let's look at how we implement our Durable Object. This is where the magic happens, each Durable Object instance will be tied to a specific user and contain their own SQLite database.
 
 ```typescript title="src/index.ts" ins={4-5,7,22,26-27,29-44}
 import { DurableObject } from 'cloudflare:workers';
@@ -331,8 +331,6 @@ Let's break down what's happening here:
 
 1. In the constructor, we initialize Drizzle with `ctx.storage`, which is the Durable Object's built-in storage that SQLite operates on. This gives us a `DrizzleSqliteDODatabase` which is unique per Durable Object. Everytime we do an operation using this object, we are interacting with a single SQLite instance.
 
-2. We use `blockConcurrencyWhile` to run migrations before accepting any requests. This ensures our database schema is up-to-date.
-
 3. We create methods that map directly to our database operations. These methods will be called from our API routes.
 
 The key insight here is that each instance of our `DurableDatabase` class is completely isolated from other instances. When we create a Durable Object for a user, they get their own private database.
@@ -341,7 +339,7 @@ The key insight here is that each instance of our `DurableDatabase` class is com
 
 Database migration for Durable Object SQLite can be confusing, but the key thing to understand is that migrations must be run in the constructor of the Durable Object class.
 
-Durable Object constructors run when a request is routed to an instance that isn't currently active - basically on cold start. When you try to access a specific Durable Object from a Worker using its name/ID, if the Durable Object for that ID isn't already in memory somewhere in Cloudflare's edge network, a new instance spins up and the constructor is run once.
+Durable Object constructors run when a request is routed to an instance that isn't currently active, basically on cold start. When you try to access a specific Durable Object from a Worker using its name/ID, if the Durable Object for that ID isn't already in memory somewhere in Cloudflare's edge network, a new instance spins up and the constructor is run once.
 
 After that, the object stays warm for a while (usually minutes of inactivity) before being evicted from memory. If another request comes in later, the object will spin up again and the constructor is called again.
 
@@ -405,6 +403,8 @@ export class DurableDatabase extends DurableObject {
   }
 }
 ```
+
+We use `blockConcurrencyWhile` to run migrations before accepting any requests. This ensures our database schema is up-to-date.
 
 You're asking yourself what is the `migrations` we import from `../drizzle/migrations`. These are database migration files created by [Drizzle Kit](https://orm.drizzle.team/docs/kit-overview). Drizzle Kit is a CLI tool for managing SQL database migrations with Drizzle.
 
@@ -499,16 +499,16 @@ export default {
   },
 };
 
-async function getDurableDatabaseStub(env: Bindings, userId: string) {
+function getDurableDatabaseStub(env: Bindings, userId: string) {
   const doId = env.DurableDatabase.idFromName(userId);
-  return await env.DurableDatabase.get(doId);
+  return env.DurableDatabase.get(doId);
 } 
 
 // Create a note for a user
 app.post('/:userId', async (c) => {
   const userId = c.req.param("userId");
   const { text } = await c.req.json();
-  const stub = await getDurableDatabaseStub(c.env, userId);
+  const stub = getDurableDatabaseStub(c.env, userId);
   const note = await stub.notesCreate({ text });
   return c.json({ note })
 });
@@ -516,7 +516,7 @@ app.post('/:userId', async (c) => {
 // List all notes for a user
 app.get('/:userId', async (c) => {
   const userId = c.req.param("userId");
-  const stub = await getDurableDatabaseStub(c.env, userId);
+  const stub = getDurableDatabaseStub(c.env, userId);
   const notes = await stub.notesList()
   return c.json({ notes })
 });
@@ -525,7 +525,7 @@ app.get('/:userId', async (c) => {
 app.get('/:userId/:noteId', async (c) => {
   const userId = c.req.param("userId");
   const noteId = c.req.param("noteId");
-  const stub = await getDurableDatabaseStub(c.env, userId);
+  const stub = getDurableDatabaseStub(c.env, userId);
   const note = await stub.notesGet({ id: noteId });
   if (!note) {
     return c.notFound();
@@ -537,7 +537,7 @@ app.get('/:userId/:noteId', async (c) => {
 app.delete('/:userId/:noteId', async (c) => {
   const userId = c.req.param("userId");
   const noteId = c.req.param("noteId");
-  const stub = await getDurableDatabaseStub(c.env, userId);
+  const stub = getDurableDatabaseStub(c.env, userId);
   const note = await stub.notesDel({ id: noteId });
   return c.json({ note })
 });
@@ -588,9 +588,9 @@ The key pattern in each route is:
 A durable object stub is the proxy we use to send requests to a specific Durable Object instance. We get the Durable Object ID from the `userId`, and we use it to instanciate a lightweight proxy object (the stub).
 
 ```ts
-async function getDurableDatabaseStub(env: Bindings, userId: string) {
+function getDurableDatabaseStub(env: Bindings, userId: string) {
   const doId = env.DurableDatabase.idFromName(userId);
-  return await env.DurableDatabase.get(doId);
+  return env.DurableDatabase.get(doId);
 } 
 ```
 
