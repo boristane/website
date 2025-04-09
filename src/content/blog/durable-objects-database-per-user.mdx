@@ -35,7 +35,7 @@ Before looking at implementation, let's understand why you might want one databa
 1. **Scalability** - Sharding a database into one instance per user addresses the limitations of storing and managing large datasets on a single database server
 2. **True isolation** - Each user's data is completely isolated
 3. **Simplified access control** - No complex filtering or multi-tenancy code
-4. **Performance** - Durable Objects are distributed globally, and instanciated closest to the first request they receive. As such, each database will be instanciated closes to its users, significantly reducing end-to-end latency
+4. **Performance** - Durable Objects are distributed globally, and instanciated closest to the first request they receive. As such, each database will be instanciated closest to its users, significantly reducing end-to-end latency
 
 In this example, we'll build a simple notes API where each user gets their own SQLite database. A user can create, read, list, or delete notes. They will be able to interact exclusively with their own database. By definition, a user will not be able to access another user's data.
 
