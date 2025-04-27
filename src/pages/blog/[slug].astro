@@ -4,22 +4,34 @@ import ListTags from "../../components/ListTags.vue";
 import { type CollectionPosts } from "../../types";
 import { getAllPosts, getPosts } from "../../utils/posts";
 import PostCounter from "../../components/PostCounter.vue";
+import { render } from 'astro:content';
+import TableOfContents from '../../components/TableOfContents.astro';
 
 export const prerender = true;
 export async function getStaticPaths() {
   const posts = await getAllPosts();
 
-  return posts.map((post: any) => ({
+  const headings = await Promise.all(
+    posts.map(async (post) => {
+      const data = await render(post);
+      return data.headings;
+    })
+  );
+
+  return posts.map((post: any, index) => ({
     params: { slug: post.slug },
     props: {
       post,
+      headings: headings[index],
     },
   }));
 }
 
-type Props = { post: CollectionPosts };
+type Props = {
+  post: CollectionPosts;
+};
 
-const { post } = Astro.props;
+const { post, headings } = Astro.props;
 
 if (post === undefined) {
   return new Response(JSON.stringify(await getAllPosts()));
@@ -58,36 +70,216 @@ const { Content } = await post.render();
   next={next}
   newsletter={true}
 >
-  <article class="mb-8 sm:mb-12">
-    <header class="mb-8">
-      <h1 class="text-title">
-        {title}
-      </h1>
-      <div
-        class="flex items-center gap-2 text-main text-gray-400 mt-4 flex-wrap"
-      >
-        <div class="flex-none">{date}</div>
-        {
-          location && (
-            <div class="flex gap-1 items-center">
-              <div>·</div>
-              <div class="flex-none">{location}</div>
-            </div>
-          )
-        }
-        {
-          tags?.length && (
-            <div class="flex gap-1 items-center">
-              <div>·</div>
-              <ListTags tags={tags} />
-            </div>
-          )
-        }
+  <div class="relative">
+    <!-- Main Content -->
+    <article class="w-full mb-8 sm:mb-12">
+      <header class="mb-8">
+        <h1 class="text-title">
+          {title}
+        </h1>
+        <div class="flex items-center gap-2 text-main text-gray-400 mt-4 flex-wrap">
+          <div class="flex-none">{date}</div>
+          {
+            location && (
+              <div class="flex gap-1 items-center">
+                <div>·</div>
+                <div class="flex-none">{location}</div>
+              </div>
+            )
+          }
+          {
+            tags?.length && (
+              <div class="flex gap-1 items-center">
+                <div>·</div>
+                <ListTags tags={tags} />
+              </div>
+            )
+          }
+        </div>
+      </header>
+      
+      <PostCounter type={"blog"} slug={post?.slug} client:load />
+
+      <!-- Mobile TOC (only visible on small screens) -->
+      <div class="md:hidden mb-8">
+        <TableOfContents headings={headings} />
       </div>
-    </header>
-    <PostCounter type={"blog"} slug={post?.slug} client:load />
-    <div class="max-w-none prose">
-      <Content />
+
+      <div class="max-w-none prose">
+        <Content />
+      </div>
+    </article>
+
+    <!-- Desktop TOC -->
+    <div id="toc-wrapper" class="hidden md:block fixed z-10 toc-sidebar">
+      <TableOfContents headings={headings} />
     </div>
-  </article>
+  </div>
 </BaseLayout>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    setupTOC();
+  });
+
+  function setupTOC() {
+    // Position the TOC in the left margin
+    positionTOC();
+    
+    // Set up scroll handling for heading tracking
+    setupScrollHandling();
+    
+    // Handle window resize events
+    window.addEventListener('resize', positionTOC);
+  }
+  
+  function positionTOC() {
+    const tocWrapper = document.getElementById('toc-wrapper');
+    if (!tocWrapper) return;
+    
+    const mainContent = document.querySelector('main');
+    if (!mainContent) return;
+    
+    const mainRect = mainContent.getBoundingClientRect();
+    const tocWidth = 280; // Increased from 220px to 280px
+    
+    // Clear any previous styles
+    tocWrapper.style.transition = 'opacity 0.3s ease';
+    
+    // Position based on screen size
+    if (window.innerWidth >= 1400) {
+      tocWrapper.style.left = `${mainRect.left - tocWidth - 30}px`;
+      tocWrapper.style.display = 'block';
+    } else if (window.innerWidth >= 1100) {
+      tocWrapper.style.left = '20px';
+      tocWrapper.style.display = 'block';
+    } else {
+      tocWrapper.style.display = 'none';
+    }
+    
+    tocWrapper.style.top = '120px';
+    tocWrapper.style.width = `${tocWidth}px`;
+    tocWrapper.style.maxHeight = 'calc(100vh - 180px)';
+    tocWrapper.style.overflowY = 'auto';
+    tocWrapper.style.opacity = '1';
+  }
+  
+  function setupScrollHandling() {
+    const tocLinks = document.querySelectorAll('.toc-link');
+    if (!tocLinks.length) return;
+    
+    // Get all heading elements
+    const headingElements = [];
+    const headingMap = {};
+    
+    // Build arrays of headings and create mapping to TOC links
+    tocLinks.forEach((link, index) => {
+      const id = link.getAttribute('data-heading');
+      if (id) {
+        const element = document.getElementById(id);
+        if (element) {
+          headingElements.push(element);
+          headingMap[id] = { link, index };
+        }
+      }
+    });
+    
+    if (!headingElements.length) return;
+    
+    // Set the first link as active by default
+    if (tocLinks.length > 0) {
+      tocLinks[0].classList.add('active');
+    }
+    
+    // Function to update active link based on scroll position
+    function updateActiveLink() {
+      const scrollPosition = window.scrollY;
+      let activeIndex = 0;
+      
+      // Find which heading we've scrolled past
+      for (let i = headingElements.length - 1; i >= 0; i--) {
+        // Get the top position of the heading relative to the document
+        const elemTop = headingElements[i].getBoundingClientRect().top + window.scrollY;
+        
+        // If we've scrolled past this heading (with a small offset), it's our active heading
+        if (scrollPosition >= elemTop - 120) {
+          activeIndex = i;
+          break;
+        }
+      }
+      
+      // Update active classes
+      tocLinks.forEach(link => link.classList.remove('active'));
+      const activeId = headingElements[activeIndex].id;
+      const activeLink = headingMap[activeId].link;
+      activeLink.classList.add('active');
+    }
+    
+    // Add click handlers to TOC links
+    tocLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        const id = link.getAttribute('data-heading');
+        const target = document.getElementById(id);
+        
+        if (target) {
+          // Scroll to the target heading
+          window.scrollTo({
+            top: target.offsetTop - 100,
+            behavior: 'smooth'
+          });
+          
+          // Update the URL hash
+          history.pushState(null, '', `#${id}`);
+          
+          // Set this link as active
+          tocLinks.forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+    
+    // Run initially to set the correct active link
+    updateActiveLink();
+    
+    // Throttle scroll events for better performance
+    let isScrolling = false;
+    
+    window.addEventListener('scroll', () => {
+      if (!isScrolling) {
+        window.requestAnimationFrame(() => {
+          updateActiveLink();
+          isScrolling = false;
+        });
+        isScrolling = true;
+      }
+    });
+  }
+</script>
+
+<style>
+  .toc-sidebar {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .toc-sidebar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .toc-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .toc-sidebar::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.3);
+    border-radius: 4px;
+  }
+  
+  @media (max-width: 768px) {
+    .toc-sidebar {
+      display: none !important;
+    }
+  }
+</style>

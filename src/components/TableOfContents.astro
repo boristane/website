@@ -1,0 +1,83 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+
+// Filter headings to include only those with depth <= 2
+const filteredHeadings = headings.filter((heading) => heading.depth <= 2);
+---
+
+<div class="toc-container">
+  <nav class="bg-white/5 dark:bg-hex-111827/30 rounded-lg p-4 shadow-sm border-gray-200/20 dark:border-gray-500/50">
+    <h2 class="text-base font-600 mb-3 text-sky-600 dark:text-white">Table of Contents</h2>
+    <ul class="list-none p-0 m-0">
+      {
+        filteredHeadings.map((heading) => (
+          <li class={`mb-1.5 leading-tight}`}>
+            <a 
+              href={`#${heading.slug}`} 
+              class="toc-link"
+              data-heading={heading.slug}
+              title={heading.text}
+            >
+              {heading.text}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</div>
+
+<style>
+  .toc-container {
+    width: 100%;
+  }
+
+  .toc-link {
+    display: block;
+    font-size: 0.9rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    color: var(--text-main, #374151);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .toc-link:hover {
+    color: var(--sky-600, #0284c7);
+    background-color: rgba(229, 231, 235, 0.2);
+    transform: translateX(2px);
+  }
+
+  .toc-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background-color: var(--sky-600, #0284c7);
+    border-radius: 0 2px 2px 0;
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
+  }
+
+  .toc-link.active {
+    color: var(--sky-600, #0284c7);
+    font-weight: 500;
+    background-color: rgba(37, 99, 235, 0.1);
+  }
+
+  .toc-link.active::before {
+    transform: scaleY(1);
+  }
+</style>
