@@ -1,0 +1,1051 @@
+---
+title: "Contextual Retrieval-Augmented Generation (RAG) on Cloudflare Workers"
+description: Implementing Contextual Retrieval-Augmented Generation with Using Cloudflare AI, Vectorize and D1 database with Drizzle ORM in a Hono app
+date: 2025-04-27
+tags:
+  - cloudflare dev 101
+  - cloudflare workers
+  - cloudflare ai
+  - rag
+---
+
+import BlogImage from '../../components/BlogImage.astro';
+
+Today I am sharing a powerful pattern I've implemented on the [Cloudflare Developers Platform](https://workers.dev) whilst building my [weekends project](https://basebrain.ai): [Contextual Retrieval-Augmented Generation (RAG)](https://www.anthropic.com/news/contextual-retrieval).
+
+Traditional RAG implementations often fall short when presented with nuanced queries or complex documents. Contextual RAG is an answer to this problem.
+
+In this blog post, I'll walk through implementing a contextual RAG system entirely on the [Cloudflare Developer Plarform](https://workers.dev). You'll see how combining vector search with full-text search, query rewriting, and smart ranking techniques creates a system that truly understands your content.
+
+## What is Contextual RAG
+
+If you're doing any kind of RAG today, you're probably:
+
+1. Chunking documents
+2. Storing vectors
+3. Searching embeddings
+4. Stuffing the results into your LLM context window
+
+The problem is simple: chunking is often not good enough. When you retrieve a chunk based on cosine similarity, it might be totally out of context and irrelevant to the user query.
+
+In a nutshell, key issues with traditional RAG systems are:
+
+1. **Context loss**: When documents are chunked into smaller pieces, the broader context that gives meaning to each chunk is often lost
+2. **Relevance issues**: Vector search alone might retrieve semantically similar content that isn't actually relevant to the query
+3. **Query limitations**: User queries are often ambiguous or lack specificity needed for effective retrieval
+
+Contextual RAG provides a solution to these issues. It consists of pre-pending every chunk with a short explanation situating it within the context of the entire document. Every chunk is passed through an LLM to provide this context.
+
+The prompt looks like:
+
+```txt
+<document> 
+{{WHOLE_DOCUMENT}} 
+</document> 
+Here is the chunk we want to situate within the whole document 
+<chunk> 
+{{CHUNK_CONTENT}} 
+</chunk> 
+Please give a short succinct context to situate this chunk within the overall document for the purposes of improving search retrieval of the chunk. Answer only with the succinct context and nothing else. 
+```
+
+The result is a short sentence situating the chunk within the context of the entire documents. It is prepended to the actual chunk before inserting it into the vector databse. This provides a solution to the context loss challenge.
+
+Additionally, the query side of the RAG system is enhanced with full-text search, reciprocal rank fusion and a LLM reranker.
+
+<BlogImage path="/assets/blog/cloudflare-contextual-rag/flow.png" title="Contextual Retrieval + Reranking" id="flow"/>
+
+With this technique the challenges of traditional RAG are addressed by:
+
+1. **Enhancing chunks with context**: Each chunk is augmented with contextual information from the full document
+2. **Using hybrid search**: Combining vector similarity with keyword-based search
+3. **Rewriting queries**: Expanding and transforming user queries into multiple search variations
+4. **Intelligent ranking**: Using sophisticated algorithms to merge and rank results from different search methods
+
+Let's dive deeper and see how to implemented this on Cloudflare Workers.
+
+## Project Overview
+
+We'll be using:
+
+- [**Cloudflare Workers**](https://developers.cloudflare.com/workers/) - Our serverless platform
+- [**Cloudflare D1**](https://developers.cloudflare.com/d1/) - SQL database for document storage
+- [**Cloudflare Vectorize**](https://developers.cloudflare.com/vectorize/) - Vector search engine
+- [**Workers AI**](https://developers.cloudflare.com/ai/) - Cloudflare AI platform
+- [**Drizzle ORM**](https://orm.drizzle.team/) - Type-safe database access
+- [**Hono**](https://hono.dev/) - Lightweight framework for our API routes
+
+Here's the basic structure of the project:
+
+```
+.
+├── bindings.ts                # Bindings TypeScript Definition
+├── bootstrap.sh               # Automate creating the Cloudflare resources
+├── drizzle.config.ts          # Database configuration
+├── fts5.sql                   # Full-text search SQL triggers
+├── package.json               # Dependencies and scripts
+├── src
+│   ├── db
+│   │   ├── index.ts           # Database CRUD operations
+│   │   ├── schemas.ts         # Databae schema definition
+│   │   └── types.ts           # Database TypeScript types
+│   ├── index.ts               # Main Worker code and Durable Object
+│   ├── search.ts              # Search functionality
+│   ├── utils.ts               # Util functions
+│   └── vectorize.ts           # Vectorize operations
+├── tsconfig.json              # TypeScript configuration
+└── wrangler.json              # Cloudflare Workers configuration
+```
+
+This final solution will be implementing the following architecture. The goal of this blog post is to walk through each item individually and finally explain how they all work together.
+
+<BlogImage path="/assets/blog/cloudflare-contextual-rag/architecture.png" title="Solution Architecture" id="architecture"/>
+
+The complete source code for this blog post is available on [GitHub](https://github.com/boristane/cloudflare-dev-101/tree/main/contextual-rag). I suggest following the post with the source code available for reference.
+
+## Bootstrapping the RAG System
+
+We first need to create our cloud resources. Let's create a `bootstrap.sh` script that creates a Vectorize index and a D1 database:
+
+```bash title="bootstrap.sh"
+#! /bin/bash
+set -e
+
+npx wrangler vectorize create contextual-rag-index --dimensions=1024 --metric=cosine
+npx wrangler vectorize create-metadata-index contextual-rag-index --property-name=timestamp --type=number
+
+npx wrangler d1 create contextual-rag
+```
+
+It use [wrangler](https://developers.cloudflare.com/workers/wrangler/) to create:
+
+1. A Vectorize index for storing embeddings
+2. A metadata index for timestamp-based filtering
+3. A D1 database for document storage
+
+
+Running this script will output a database ID we will use in our `wrangler.json` and `drizzle.config.ts` files.
+
+Next, after creating a Node.js project with `npm` and configuring TypeScript, let's create our `wrangler.json` file to configure our Cloudflare Worker and connect our resources to it.
+
+```json title="wrangler.json"
+{
+  "name": "contextual-rag",
+  "compatibility_date": "2024-11-12",
+  "workers_dev": true,
+  "upload_source_maps": true,
+  "observability": {
+    "enabled": true
+  },
+  "main": "./src/index.ts",
+  "vectorize": [
+    {
+      "binding": "VECTORIZE",
+      "index_name": "contextual-rag-index"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "D1",
+      "database_name": "contextual-rag",
+      "database_id": "<REPLACE WITH YOUR DATABASE ID>"
+    }
+  ],
+  "ai": {
+    "binding": "AI"
+  },
+  "vars": {}
+}
+```
+
+## Document Ingestion Pipeline
+
+After initializing the project, the first step is to ingest documents we want to retrieve. We are building everything on a Hono application deployed on Cloudflare Workers.
+
+Our API endpoint for document uploads looks like this:
+
+```typescript title="src/index.ts"
+app.post('/', async (c) => {
+  const { contents } = await c.req.json();
+  if (!contents || typeof contents !== "string") return c.json({ message: "Bad Request" }, 400)
+
+  const doc = await createDoc(c.env, { contents });
+
+  const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 1024,
+    chunkOverlap: 200,
+  });
+  const raw = await splitter.splitText(contents);
+  const chunks = await contextualizeChunks(c.env, contents, raw)
+  await insertChunkVectors(c.env, { docId: doc.id, created: doc.created }, chunks);
+
+  return c.json(doc)
+});
+```
+
+It's a `POST` endpoint that takes the contents of the document to process. The processing steps are:
+
+1. Store the complete document in the database
+2. Split the document into manageable chunks
+3. Contextualize each chunk
+4. Generate vector embeddings for each chunk
+5. Store the chunks and their embeddings
+
+### Text Splitting
+
+We split the documents because LLMs have limited context windows, and retrieving entire documents for every query would be inefficient. By splitting documents into smaller chunks, we can retrieve only the most relevant pieces.
+
+We use the [RecursiveCharacterTextSplitter](https://v03.api.js.langchain.com/classes/langchain.text_splitter.RecursiveCharacterTextSplitter.html) from LangChain, which intelligently splits text based on content boundaries:
+
+```typescript title="src/index.ts"
+const splitter = new RecursiveCharacterTextSplitter({
+  chunkSize: 1024,
+  chunkOverlap: 200,
+});
+const raw = await splitter.splitText(contents);
+```
+
+The `chunkSize` parameter controls the maximum size of each chunk, while `chunkOverlap` creates an overlap between adjacent chunks. This overlap helps maintain context across chunk boundaries and prevents information from being lost at the dividing points.
+
+### Context Enhancement
+
+This is where we do the "contextual" part of Contextual RAG. Instead of storing raw chunks, we first enhance each chunk with contextual information situating it within the context of the full text:
+
+```typescript title="src/vectorize.ts"
+export async function contextualizeChunks(env: { AI: Ai }, content: string, chunks: string[]): Promise<string[]> {
+  const promises = chunks.map(async c => {
+
+    const prompt = `<document> 
+${content} 
+</document> 
+Here is the chunk we want to situate within the whole document 
+<chunk> 
+${c}
+</chunk> 
+Please give a short succinct context to situate this chunk within the overall
+document for the purposes of improving search retrieval of the chunk.
+Answer only with the succinct context and nothing else. `;
+
+    // @ts-ignore
+    const res = await env.AI.run("@cf/meta/llama-3.1-8b-instruct-fast", {
+      prompt,
+    }) as { response: string }
+
+    return `${res.response}; ${c}`;
+  })
+
+  return await Promise.all(promises);
+}
+```
+Without the context, chunks become isolated islands of information, divorced from their surrounding context. For example, a chunk containing "it increases efficiency by 40%" is meaningless without knowing what "it" refers to. By adding contextual information to each chunk, we make them more self-contained and improve retrieval accuracy.
+
+We use an LLM to analyze the relationship between the chunk and the full document, then generate a short context summary that precedes the chunk text. This enhancement makes each chunk more self-contained and improves retrieval relevance.
+
+For example, I tried this with a short text describing Paris. After chunking the text, one of the chunks was:
+
+> The city doesn’t shout. It smirks. It moves with a kind of practiced nonchalance, a shrug that says, of course it’s beautiful here. It’s a city built for daydreams and contradictions, grand boulevards designed for kings now flooded with delivery bikes and tourists holding maps upside-down. Crumbling stone facades wear ivy and grime like couture. Every corner feels staged, but somehow still effortless, like the city isn’t even trying to impress you.
+
+There is no indication that this chunk is talking about Paris.
+
+The enhanced chunk after running through the LLM is:
+
+> The chunk describes the essence and atmosphere of Paris, highlighting its unique blend of beauty, history, and contradictions.; The city doesn’t shout. It smirks. It moves with a kind of practiced nonchalance, a shrug that says, of course it’s beautiful here. It’s a city built for daydreams and contradictions, grand boulevards designed for kings now flooded with delivery bikes and tourists holding maps upside-down. Crumbling stone facades wear ivy and grime like couture. Every corner feels staged, but somehow still effortless, like the city isn’t even trying to impress you.
+
+A retrieval query consisting of just the word **Paris** is more likely to match the enhanced chunk versus the raw chunk without context.
+
+### Vector Generation and Storage
+
+After contextualizing the chunks, we generate vector embeddings and store them in Cloudflare Vectorize and D1:
+
+```typescript title="src/vectorize.ts"
+export async function insertChunkVectors(
+  env: { D1: D1Database, AI: Ai, VECTORIZE: Vectorize },
+  data: { docId: string, created: Date },
+  chunks: string[],
+) {
+
+  const { docId, created } = data;
+  const batchSize = 10;
+  const insertPromises = [];
+
+  for (let i = 0; i < chunks.length; i += batchSize) {
+    const chunkBatch = chunks.slice(i, i + batchSize);
+
+    insertPromises.push(
+      (async () => {
+        const embeddingResult = await env.AI.run("@cf/baai/bge-large-en-v1.5", {
+          text: chunkBatch,
+        });
+        const embeddingBatch: number[][] = embeddingResult.data;
+
+        const chunkInsertResults = await Promise.all(chunkBatch.map(c => createChunk(env, { docId, text: c })))
+        const chunkIds = chunkInsertResults.map((result) => result.id);
+
+        await env.VECTORIZE.insert(
+          embeddingBatch.map((embedding, index) => ({
+            id: chunkIds[index],
+            values: embedding,
+            metadata: {
+              docId,
+              chunkId: chunkIds[index],
+              text: chunkBatch[index],
+              timestamp: created.getTime(),
+            },
+          }))
+        );
+      })()
+    );
+  }
+
+  await Promise.all(insertPromises);
+}
+```
+
+This function:
+
+1. Divides chunks into batches of 10
+2. Generates embeddings for each batch using Cloudflare AI
+3. Stores the chunks in the D1 database
+4. Stores the embeddings and associated metadata in Vectorize
+
+The `createChunk` function inserts the chunks the D1 database and gives us a unique ID for each chunk, which is then shared in Vectorize. The next section gives more details on the D1 database.
+
+The metadata attached to each vector includes the original text, document ID, and timestamp, which enables filtering and improves retrieval performance.
+
+### D1 Database Schema
+
+Our RAG system must combine full-text and vector search.
+
+We have two data models to store outside of the vector database: full documents and the chunks derived from them. For this, I'm using Cloudflare D1 (SQLite) with Drizzle ORM.
+
+Here's the schema definition:
+
+```typescript title="src/db/schemas.ts"
+import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+
+export const docs = sqliteTable(
+  "docs",
+  {
+    id: text("id")
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => randomString()),
+    contents: text("contents"),
+    created: integer("created", { mode: "timestamp_ms" })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updated: integer("updated", { mode: "timestamp_ms" })
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => ([
+    index("docs.created.idx").on(table.created),
+  ]),
+);
+
+
+export const chunks = sqliteTable(
+  "chunks",
+  {
+    id: text("id")
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => randomString()),
+    docId: text('doc_id').notNull(),
+    text: text("text").notNull(),
+    created: integer("created", { mode: "timestamp_ms" })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (table) => ([
+    index("chunks.doc_id.idx").on(table.docId),
+  ]),
+);
+
+function randomString(length = 16): string {
+  const chars = "abcdefghijklmnopqrstuvwxyz";
+  const resultArray = new Array(length);
+
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * chars.length);
+    resultArray[i] = chars[randomIndex];
+  }
+
+  return resultArray.join("");
+}
+```
+
+With these schemas, we can add CRUD functions to write reand and write documents and chunks in D1.
+
+```typescript title="src/db/index.ts"
+
+export function getDrizzleClient(env: DB) {
+  return drizzle(env.D1, {
+    schema,
+  });
+}
+
+export async function createDoc(env: DB, doc: InsertDoc): Promise<Doc> {
+  const d1 = getDrizzleClient(env);
+
+  const [res] = await d1
+    .insert(docs)
+    .values(doc)
+    .onConflictDoUpdate({
+      target: [docs.id],
+      set: doc,
+    })
+    .returning();
+
+  return res;
+}
+
+export async function listDocsByIds(
+  env: DB,
+  params: { ids: string[] },
+): Promise<Doc[]> {
+  const d1 = getDrizzleClient(env);
+
+  const qs = await d1
+    .select()
+    .from(docs)
+    .where(inArray(docs.id, params.ids))
+  return qs;
+}
+
+export async function createChunk(env: DB, chunk: InsertChunk): Promise<Chunk> {
+  const d1 = getDrizzleClient(env);
+
+  const [res] = await d1
+    .insert(chunks)
+    .values(chunk)
+    .onConflictDoUpdate({
+      target: [chunks.id],
+      set: chunk,
+    })
+    .returning();
+
+  return res;
+}
+```
+
+### SQLite Full-Text Search
+
+While vector search excels at semantic similarity, it often misses exact keyword matches that full-text search handles perfectly. Full-text search excels at finding exact keyword matches and can retrieve relevant content even when the semantic meaning might be ambiguous. By combining both approaches, we get the best of both worlds.
+
+SQLite provides a powerful full-text search extension called [FTS5](https://www.sqlite.org/fts5.html). We'll create a virtual table that mirrors our `chunks` table but with full-text search capabilities:
+
+```sql title="fts5.sql"
+CREATE VIRTUAL TABLE chunks_fts USING fts5(
+	id UNINDEXED,
+	doc_id UNINDEXED,
+	text,
+	content = 'chunks',
+	created
+);
+
+CREATE TRIGGER chunks_ai
+AFTER
+INSERT
+	ON chunks BEGIN
+INSERT INTO
+	chunks_fts(id, doc_id, text, created)
+VALUES
+	(
+		new.id,
+		new.doc_id,
+		new.text,
+		new.created
+	);
+
+END;
+
+CREATE TRIGGER chunks_ad 
+AFTER DELETE ON chunks 
+FOR EACH ROW
+BEGIN
+    DELETE FROM chunks_fts WHERE id = old.id;
+		INSERT INTO chunks_fts(chunks_fts) VALUES('rebuild');
+END;
+
+CREATE TRIGGER chunks_au 
+AFTER UPDATE ON chunks BEGIN
+    DELETE FROM chunks_fts WHERE id = old.id;
+    INSERT INTO chunks_fts(id, doc_id, text, created)
+    VALUES (new.id, new.doc_id, new.text, new.created);
+		INSERT INTO chunks_fts(chunks_fts) VALUES('rebuild');
+END;
+```
+
+The triggers ensure that our FTS table stays in sync with the main chunks table. Whenever a chunk is inserted, updated, or deleted, the corresponding entry in the FTS table is also modified.
+
+We use [DrizzleKit](https://orm.drizzle.team/docs/kit-overview) to create migration files for our D1 database with this schema.
+
+```bash
+drizzle-kit generate
+```
+
+The above SQL for the FTS tables must be included manually in the migration file before running the migration in D1. Otherwise, we will not have full-text search capabilities in our SQLite database.
+
+```bash
+drizzle-kit migrate
+```
+
+Once the migration is completed, we're ready to start processing documets in the ingestion side of our RAG system.
+
+
+## Query Processing and Search
+
+Now let's examine how queries are handled. Our query endpoint looks like this:
+
+```typescript title="src/index.ts"
+app.post('/query', async (c) => {
+  const { prompt, timeframe } = await c.req.json();
+
+  if (!prompt) return c.json({ message: "Bad Request" }, 400);
+
+  const searchOptions: {
+    timeframe?: { from?: number; to?: number };
+  } = {};
+
+  if (timeframe) {
+    searchOptions.timeframe = timeframe;
+  }
+
+  const ai = createWorkersAI({ binding: c.env.AI });
+  // @ts-ignore
+  const model = ai("@cf/meta/llama-3.1-8b-instruct-fast") as LanguageModel;
+
+  const { queries, keywords } = await rewriteToQueries(model, { prompt });
+
+  const { chunks } = await searchDocs(c.env, {
+    questions: queries,
+    query: prompt,
+    keywords,
+    topK: 8,
+    scoreThreshold: 0.501,
+    ...searchOptions,
+  });
+
+  const uniques = getUniqueListBy(chunks, "docId").map((r) => {
+    const arr = chunks
+      .filter((f) => f.docId === r.docId)
+      .map((v) => v.score);
+    return {
+      id: r.docId,
+      score: Math.max(...arr),
+    };
+  });
+
+  const res = await listDocsByIds(c.env, { ids: uniques.map(u => u.id) });
+  const answer = await c.env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", {
+    prompt: `${prompt}
+    
+Context: ${chunks}`
+  })
+
+  return c.json({
+    keywords,
+    queries,
+    chunks,
+    answer,
+    docs: res.map(doc => ({ ...doc, score: uniques.find(u => u.id === doc.id)?.score || 0 })).sort((a, b) => b.score - a.score)
+  })
+});
+
+function getUniqueListBy<T extends Record<string, unknown>>(arr: T[], key: keyof T): T[] {
+  const result: T[] = [];
+  for (const elt of arr) {
+    const found = result.find((t) => t[key] === elt[key]);
+    if (!found) {
+      result.push(elt);
+    }
+  }
+  return result;
+}
+```
+
+It's a `POST` endpoint that uses the [AI SDK](https://sdk.vercel.ai/) and the [Workers AI Provider](https://github.com/cloudflare/ai/tree/main/packages/workers-ai-provider) to complete the following steps:
+
+1. **Query rewriting**: Rewrite the user prompt into multiple related questions and keywords to imporve RAG performance 
+2. **Hybrid search**: Combining vector and text search
+3. **Result fusion and reranking**
+4. **Answer generation**
+
+Let's examine each in detail.
+
+### Query Rewriting
+
+Users rarely express their needs perfectly on the first try. Their queries are often ambiguous or lack specific keywords that would make retrieval effective. Query rewriting expands the original query into multiple variations:
+
+```typescript title="src/search.ts"
+export async function rewriteToQueries(model: LanguageModel, params: { prompt: string }): Promise<{ keywords: string[], queries: string[] }> {
+  const prompt = `Given the following user message,
+rewrite it into 5 distinct queries that could be used to search for relevant information,
+and provide additional keywords related to the query.
+Each query should focus on different aspects or potential interpretations of the original message.
+Each keyword should be a derived from an interpratation of the provided user message.
+
+User message: ${params.prompt}`;
+
+  try {
+    const res = await generateObject({
+      model,
+      prompt,
+      schema: z.object({
+        queries: z.array(z.string()).describe(
+          "Similar queries to the user's query. Be concise but comprehensive."
+        ),
+        keywords: z.array(z.string()).describe(
+          "Keywords from the query to use for full-text search"
+        ),
+      }),
+    })
+
+    return res.object;
+  } catch (err) {
+    return {
+      queries: [params.prompt],
+      keywords: []
+    }
+  }
+}
+```
+
+By generating multiple interpretations of the original query, we can capture different aspects and increase the likelihood of finding relevant information.
+
+The AI model generates:
+1. A set of expanded queries that explore different interpretations of the user's question
+2. Keywords extracted from the query for full-text search
+
+This approach dramatically improves search recall compared to using just the original query.
+
+For example, I sent this prompt:
+
+> what's special about paris?
+
+and it was rewritten as:
+
+```json
+{
+  "keywords": [
+		"paris",
+		"eiffel tower",
+		"monet",
+		"loire river",
+		"montmartre",
+		"notre dame",
+		"art",
+		"history",
+		"culture",
+		"tourism"
+	],
+	"queries": [
+		"paris attractions",
+		"paris landmarks",
+		"paris history",
+		"paris culture",
+		"paris tourism"
+	]
+}
+```
+
+By searching the databases with all these combinations, we increase the likelihood of finding relevant chunks.
+
+### Hybrid Search
+
+With our rewritten queries and extracted keywords, we now perform a hybrid search using both vector similarity and full-text search:
+
+```typescript title="src/search.ts"
+export async function searchDocs(env: SearchBindings, params: DocSearchParams): Promise<{ chunks: Array<{ text: string, id: string, docId: string; score: number }> }> {
+  const { timeframe, questions, keywords } = params;
+
+  const [vectors, sql] = (await Promise.all([
+    queryChunkVectors(env, { queries: questions, timeframe, },),
+    searchChunks(env, { needles: keywords, timeframe }),
+  ]));
+
+  const searchResults = {
+    vectors,
+    sql: sql.map(item => {
+      return {
+        id: item.id,
+        text: item.text,
+        docId: item.doc_id,
+        rank: item.rank,
+      }
+    })
+  };
+
+  const mergedResults = performReciprocalRankFusion(searchResults.sql, searchResults.vectors);
+  const res = await processSearchResults(env, params, mergedResults);
+  return res;
+}
+```
+
+Vector search excels at finding semantically similar content but can miss exact keyword matches while full-text search is great at finding keyword matches but lacks semantic understanding.
+
+By running both search types in parallel and then merging the results, we get more comprehensive coverage.
+
+The vector search looks for embeddings similar to our query embeddings, applying timestamp filters if they are provided:
+
+```typescript title="src/vectorize.ts"
+export async function queryChunkVectors(
+  env: { AI: Ai, VECTORIZE: Vectorize },
+  params: { queries: string[], timeframe?: { from?: number, to?: number } }) {
+  const { queries, timeframe, } = params;
+  const queryVectors = await Promise.all(
+    queries.map((q) => env.AI.run("@cf/baai/bge-large-en-v1.5", { text: [q] }))
+  );
+
+  const filter: VectorizeVectorMetadataFilter = {  };
+  if (timeframe?.from) {
+    // @ts-expect-error error in the package
+    filter.timestamp = { "$gte": timeframe.from }
+  }
+  if (timeframe?.to) {
+    // @ts-expect-error error in the package
+    filter.timestamp = { "$lt": timeframe.to }
+  }
+
+  const results = await Promise.all(
+    queryVectors.map((qv) =>
+      env.VECTORIZE.query(qv.data[0], {
+        topK: 20,
+        returnValues: false,
+        returnMetadata: "all",
+        filter,
+      })
+    )
+  );
+
+  return results;
+}
+```
+
+The full-text search uses SQLite's FTS5 to find keyword matches:
+
+```typescript title="src/db/index.ts"
+export async function searchChunks(env: DB, params: { needles: string[], timeframe?: { from?: number, to?: number }; }, limit = 40) {
+  const d1 = getDrizzleClient(env);
+
+  const { needles, timeframe } = params;
+  const queries = needles.filter(Boolean).map(
+    (term) => {
+      const sanitizedTerm = term.trim().replace(/[^\w\s]/g, '');
+
+      return `
+        SELECT chunks.*, bm25(chunks_fts) AS rank
+        FROM chunks_fts
+        JOIN chunks ON chunks_fts.id = chunks.id
+        WHERE chunks_fts MATCH '${sanitizedTerm}'
+        ${timeframe?.from ? `AND created > ${timeframe.from}` : ''}
+        ${timeframe?.to ? `AND created < ${timeframe.to}` : ''}
+        ORDER BY rank
+        LIMIT ${limit}
+      `;
+    }
+  );
+
+  const results = await Promise.all(
+    queries.map(async (query) => {
+      const res = await d1.run(query);
+      return res.results as ChunkSearch[];
+    })
+  );
+
+  return results.flat()
+}
+```
+
+We're using the [BM25 ranking algorithm](https://www.sqlite.org/fts5.html#the_bm25_function) (built into FTS5) to sort results by relevance. It's an algorithm that considers term frequency, document length, and other factors to determine relevance.
+
+### Reciprocal Rank Fusion
+
+After getting results from both search methods, we need to merge them. This is where [Reciprocal Rank Fusion (RRF)](https://learn.microsoft.com/en-us/azure/search/hybrid-search-ranking) comes in.
+
+It's a rank aggregation method that combines ranking from multiple sources into a single unified ranking.
+
+When you have multiple ranked lists from different systems, each with their own scoring method, it's challenging to merge them fairly. RRF provides a principled way to combine these lists by:
+
+1. Considering the rank position rather than raw scores (which may not be comparable)
+2. Giving higher weights to items that appear at high ranks in multiple lists
+3. Using a constant `k` to mitigate the impact of outliers
+
+The formula gives each item a score based on its rank in each list: `score = 1 / (k + rank)`. Items that appear high in multiple lists get the highest combined scores.
+
+The constant `k` (set to 60 in our implementation) is crucial as it prevents items that appear at the very top of only one list from completely dominating the results. A larger k value makes the algorithm more conservative, reducing the advantage of top-ranked items and giving more consideration to items further down the lists.
+
+
+```typescript title="src/utils.ts"
+export function performReciprocalRankFusion(
+  fullTextResults: DocMatch[],
+  vectorResults: VectorizeMatches[]
+): { docId: string,  id: string; score: number; text?: string }[] {
+
+  const vectors = uniqueVectorMatches(vectorResults.flatMap(r => r.matches));
+  const sql = uniqueDocMatches(fullTextResults);
+
+  const k = 60; // Constant for fusion, can be adjusted
+  const scores: { [key: string]: { id: string, text?: string;  docId: string, score: number } } = {};
+
+  // Process full-text search results
+  sql.forEach((result, index) => {
+    const key = result.id;
+    const score = 1 / (k + index);
+    scores[key] = {
+      id: result.id,
+      docId: result.docId,
+      text: result.text,
+      score: (scores[key]?.score || 0) + score,
+    };
+  });
+
+  // Process vector search results
+  vectors.forEach((match, index) => {
+    const key = match.id;
+    const score = 1 / (k + index);
+    scores[key] = {
+      id: match.id,
+      docId: match.metadata?.docId as string,
+      text: match.metadata?.text as string,
+      score: (scores[key]?.score || 0) + score,
+    };
+  });
+
+  const res = Object.entries(scores)
+    .map(([key, { id, score, docId, text }]) => ({ docId, id, score, text }))
+    .sort((a, b) => b?.score - a?.score);
+
+  return res.slice(0, 150);
+}
+```
+
+### AI Reranking
+
+After merging the results, we use another LLM to rerank them based on their relevance to the original query.
+
+The initial search and fusion steps are based on broader relevance signals. The reranker performs a more focused assessment of whether each result directly answers the user's question. It uses [baai/bge-reranker-base](https://huggingface.co/BAAI/bge-reranker-base), a reranker model. These models are language models that reorder search results based on relevance to the user query, improving the qualify of the RAG. They take as input the user query and a list of documents, and return the order of the documents from most relevant to the query to least.
+
+```typescript title="src/search.ts"
+async function processSearchResults(env: SearchBindings, params: DocSearchParams, mergedResults: { docId: string, id: string; score: number; text?: string }[]) {
+  if (!mergedResults.length) return { chunks: [] };
+  const { query, scoreThreshold, topK } = params;
+  const chunks: Array<{ text: string; id: string; docId: string } & { score: number }> = [];
+
+  const response = await env.AI.run(
+    "@cf/baai/bge-reranker-base",
+    {
+      // @ts-ignore
+      query,
+      contexts: mergedResults.map(r => ({ id: r.id, text: r.text }))
+    },
+  ) as { response: Array<{ id: number, score: number }> };
+
+
+  const scores = response.response.map(i => i.score);
+  let indices = response.response.map((i, index) => ({ id: i.id, score: sigmoid(scores[index]) }));
+  if (scoreThreshold && scoreThreshold > 0) {
+    indices = indices.filter(i => i.score >= scoreThreshold);
+  }
+  if (topK && topK > 0) {
+    indices = indices.slice(0, topK)
+  }
+
+  const slice = reorderArray(mergedResults, indices.map(i => i.id)).map((v, index) => ({ ...v, score: indices[index]?.score }));
+
+  await Promise.all(slice.map(async result => {
+    if (!result) return;
+    const a = {
+      text: result.text || (await getChunk(env, { docId: result.docId, id: result.id }))?.text || "",
+      docId: result.docId,
+      id: result.id,
+      score: result.score,
+    };
+
+    chunks.push(a)
+  }));
+
+  return { chunks };
+}
+```
+
+After reranking, we apply a sigmoid function to transform the raw scores:
+
+```typescript title="src/search.ts"
+function sigmoid(score: number, k: number = 0.4): number {
+  return 1 / (1 + Math.exp(-score / k));
+}
+```
+
+The reranker's raw scores can have a wide range and don't directly translate to a probability of relevance. The sigmoid function has a few compelling characteristics:
+
+1. **Bounded output range**: Sigmoid squashes values into a fixed range (0,1), creating a probability-like score that's easier to interpret and threshold.
+2. **Non-linear transformation**: Sigmoid emphasizes differences in the middle range while compressing extremes, which is ideal for relevance scoring where we need to distinguish between "somewhat relevant" and "very relevant" items.
+3. **Stability with outliers**: Extreme scores don't disproportionately affect the normalized range.
+4. **Ordering**: Sigmoid maintains the relative ordering of results
+
+
+The parameter `k` controls the steepness of the sigmoid curve: a smaller value creates a sharper distinction between relevant and irrelevant results. The specific value of `k=0.4` was chosen after experimentation to create an effective decision boundary around the 0.5 mark. Results above this threshold are considered sufficiently relevant for inclusion in the final context.
+
+Below is a plot of our sigmoid function:
+
+<BlogImage path="/assets/blog/cloudflare-contextual-rag/sigmoid.png" title="Sigmoid - 1 / (1 + e^(-x/0.4))" id="sigmoid"/>
+
+We pass the reranker score of each chunk through the `signoid` function, and we can set a fixed threshold score as the `sigmoid` normalises the scores. We can ignore anything below the threshold score as these chunks are likely not relevant to the user query.
+
+Without the `sigmoid` function, each ranking would have a different score distribution and it would be difficult to fairly select a threshold score.
+
+### Search Parameter Tuning
+
+The `searchDocs` function includes several parameters that significantly impact retrieval quality:
+
+```typescript title="src/index.ts"
+const { chunks } = await searchDocs(c.env, {
+  questions: queries,
+  query: prompt,
+  keywords,
+  topK: 8,
+  scoreThreshold: 0.501,
+  ...searchOptions,
+});
+```
+
+
+The `topK` parameter limits the number of chunks we retrieve, which is essential for:
+
+1. Managing the LLM context window size limitations
+2. Reducing noise in the context that could distract the model
+3. Minimizing cost and latency
+
+The `scoreThreshold` is calibrated to work with our `sigmoid` normalization. Since sigmoid transforms scores to the (0,1) range with 0.5 representing the inflection point, setting the threshold just above 0.5 ensures we only include chunks that the reranker determined are more likely relevant than not.
+
+This threshold prevents the inclusion of marginally relevant content that might dilute the quality of our context window.
+
+### Answer Generation
+
+Finally, we generate an answer using the retrieved chunks as context:
+
+```typescript
+const answer = await c.env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", {
+  prompt: `${prompt}
+  
+Context: ${chunks}`
+})
+```
+
+This step is where the "Generation" part of RAG comes in. The LLM receives both the user's question and the retrieved context, then generates an answer that draws on that context.
+
+### Stitching it all together
+
+The entire system is an integrated pipeline where each component builds upon the previous ones:
+
+1. When a query arrives, it first hits the Query Rewriter, which expands it into multiple variations to improve search coverage.
+
+2. These expanded queries alongside extracted keywords simultaneously feed into two separate search systems:
+   - Vector Search (semantic similarity using embeddings)
+   - Full-Text Search (keyword matching using FTS5)
+
+3. The results from both search methods then enter the Reciprocal Rank Fusion function, which combines them based on rank position. This solves the challenge of comparing scores from fundamentally different systems.
+
+4. The fused results are then passed to the AI Reranker, which performs an LLM based relevance assessment focused on answering the original query.
+
+5. The reranked results are then filtered by score threshold and count limits before being passed into the context window for the final LLM.
+
+6. The LLM receives both the original query and the curated context to produce the final answer.
+
+This multi-stage approach creates a system that outperforms traditional RAG systems.
+
+
+## Testing It Out
+
+Now let's see how our contextual RAG system works in practice. After deploying your Worker using `wrangler`, you'll get a URL for your Worker:
+
+```txt
+https://contextual-rag.account-name.workers.dev
+```
+
+where `account-name` is the name of your Cloudflare account.
+
+Here are some example API calls:
+
+#### Uploading a document
+
+```bash
+curl -X POST https://contextual-rag.account-name.workers.dev/ \
+  -H "Content-Type: application/json" \
+  -d '{"contents":"Paris doesn’t shout. It smirks. It moves with a kind of practiced nonchalance, a shrug that says, of course it’s beautiful here. It’s a city built for daydreams and contradictions — grand boulevards designed for kings now flooded with delivery bikes and tourists holding maps upside-down. Crumbling stone facades wear ivy and grime like couture. Every corner feels staged, but somehow still effortless, like the city isn’t even trying to impress you. It just is. Each arrondissement spins its own little universe. In the Marais, tiny alleys drip with charm — cafés packed so tightly you can hear every clink of every espresso cup. Montmartre clings to its hill like a stubborn old cat... <REDACTED>"}'
+
+# Response:
+# {
+#   "id": "jtmnofvveptdalwl",
+#   "contents": "Paris doesn’t shout. It smirks. It moves with a kind of...",
+#   "created": "2025-04-26T19:50:39.941Z",
+#	  "updated": "2025-04-26T19:50:39.941Z",
+# }
+```
+
+#### Querying
+
+```bash
+curl -X POST https://contextual-rag.account-name.workers.dev/query \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"What is special about Paris?"}'
+
+# Response:
+# {
+#   "keywords": [
+#   	"paris",
+#   	"eiffel tower",
+#   	"monet",
+#   	"loire river",
+#   	"montmartre",
+#   	"notre dame",
+#   	"art",
+#   	"history",
+#   	"culture",
+#   	"tourism"
+#   ],
+#   "queries": [
+#   	"paris attractions",
+#   	"paris landmarks",
+#   	"paris history",
+#   	"paris culture",
+#   	"paris tourism"
+#   ],
+#   "chunks": [
+#     {
+#       "text": "This chunk describes Paris, the capital of France, its location on the Seine River, and its famous landmarks and characteristics.; Paris doesn’t shout. It smirks. It moves with a kind of practiced nonchalance, a shrug that says, of course it’s beautiful here. It’s a city built for daydreams and contradictions...",
+#       "id": "abcdefghijklmno",
+#       "docId": "qwertyuiopasdfg",
+#       "score": 0.8085310556071287
+#     }
+#   ],
+#   "answer": "Paris, the capital of France, is known as the City of Light. It has been a hub for intellectuals and artists for centuries, and its stunning architecture, art museums, and romantic atmosphere make it one of the most popular tourist destinations in the world. Some of the most famous landmarks in Paris include the Eiffel Tower, the Louvre Museum...",
+#   "docs": [
+#     {
+#       "id": "jtmnofvveptdalwl",
+#       "contents": "Paris doesn’t shout. It smirks. It moves with a kind of practiced nonchalance, a shrug that says, of course it’s beautiful here. It’s a city built for daydreams and contradictions...",
+#       "created": "2025-04-26T19:50:39.941Z",
+#			  "updated": "2025-04-26T19:50:39.941Z",
+#       "score": 0.8085310556071287
+#     }
+#   ]
+# }
+```
+
+## Limitations and Considerations
+
+As much as this contextual RAG system is powerful, there are several limitations and considerations to keep in mind:
+
+1. **AI Costs**: The contextual enhancement process requires running each chunk through an LLM, which increases both the computation time and cost compared to traditional RAG systems. For very large document collections, this can become a significant consideration.
+
+2. **Latency Trade-offs**: Adding multiple stages of processing (query rewriting, hybrid search, reranking) improves result quality but increases end-to-end latency. For applications where response time is critical, you might need to optimize certain components or make trade-offs.
+
+3. **Storage Growth**: The contextualized chunks are longer than raw chunks, requiring more storage in both D1 and Vectorize. It's important to monitor the size of your databases and remain below limits.
+
+4. **Rate Limits**: All components of the pipeline have rate-limits. This can affect high-throughput applications. Consider offloading the document ingestion into a queue in production.
+
+5. **Context Window Limitations**: When contextualizing chunks, very long documents may exceed the context window of the LLM. You might need to implement a hierarchical approach for extremely large documents.
+
+On [Basebrain](https://basebrain.ai), I've addressed some of these challenges by using [Cloudflare Workflows](https://developers.cloudflare.com/workflows/) for document ingestion, and Durable Objects instead of D1 for storage, where I implement [one database per user](./durable-objects-database-per-user.mdx).
