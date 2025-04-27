@@ -1,7 +1,7 @@
 export const siteConfig = {
   author: 'Boris Tane',
   title: 'Boris Tane',
-  description: "I'm Boris Tane, a software engineer",
+  description: "I'm Boris Tane, and I build software",
   site: "https://boristane.com",
   image: {
     src: '/preview.png',
