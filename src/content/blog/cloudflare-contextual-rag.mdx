@@ -11,9 +11,9 @@ tags:
 
 import BlogImage from '../../components/BlogImage.astro';
 
-Today I am sharing a powerful pattern I've implemented on the [Cloudflare Developers Platform](https://workers.dev) whilst building my [weekends project](https://basebrain.ai): [Contextual Retrieval-Augmented Generation (RAG)](https://www.anthropic.com/news/contextual-retrieval).
+Today I am sharing a powerful pattern I've implemented on the [Cloudflare Developers Platform](https://workers.dev) whilst building my [weekends project](https://basebrain.ai): Contextual Retrieval-Augmented Generation (RAG).
 
-Traditional RAG implementations often fall short when presented with nuanced queries or complex documents. Contextual RAG is an answer to this problem.
+Traditional RAG implementations often fall short when presented with nuanced queries or complex documents. Anthropic introduced [Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval) as an answer to this problem.
 
 In this blog post, I'll walk through implementing a contextual RAG system entirely on the [Cloudflare Developer Plarform](https://workers.dev). You'll see how combining vector search with full-text search, query rewriting, and smart ranking techniques creates a system that truly understands your content.
 
@@ -567,7 +567,7 @@ function getUniqueListBy<T extends Record<string, unknown>>(arr: T[], key: keyof
 
 It's a `POST` endpoint that uses the [AI SDK](https://sdk.vercel.ai/) and the [Workers AI Provider](https://github.com/cloudflare/ai/tree/main/packages/workers-ai-provider) to complete the following steps:
 
-1. **Query rewriting**: Rewrite the user prompt into multiple related questions and keywords to imporve RAG performance 
+1. **Query rewriting**: Rewrite the user prompt into multiple related questions and keywords to improve RAG performance 
 2. **Hybrid search**: Combining vector and text search
 3. **Result fusion and reranking**
 4. **Answer generation**
@@ -1048,4 +1048,4 @@ As much as this contextual RAG system is powerful, there are several limitations
 
 5. **Context Window Limitations**: When contextualizing chunks, very long documents may exceed the context window of the LLM. You might need to implement a hierarchical approach for extremely large documents.
 
-On [Basebrain](https://basebrain.ai), I've addressed some of these challenges by using [Cloudflare Workflows](https://developers.cloudflare.com/workflows/) for document ingestion, and Durable Objects instead of D1 for storage, where I implement [one database per user](./durable-objects-database-per-user.mdx).
+On [Basebrain](https://basebrain.ai), I've addressed some of these challenges by using [Cloudflare Workflows](https://developers.cloudflare.com/workflows/) for document ingestion, and Durable Objects instead of D1 for storage, where I implement [one database per user](/blog/durable-objects-database-per-user.mdx).
