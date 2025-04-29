@@ -690,7 +690,7 @@ The key insight here is that "john" and "bob" have completely separate databases
 
 While this pattern is powerful, there are a few things to keep in mind:
 
-1. **Storage Limits** - Each Durable Object has a storage limit (currently 1GB), which could be limiting and push us to further sharding depending on the scale of our app
+1. **Storage Limits** - Each Durable Object has a storage limit (currently 10GB), which could be limiting and push us to further sharding depending on the scale of our app
 2. **Cross-User Operations** - Queries across multiple users' data, for example back-office queries or analytics, require additional work
 
 On [Basebrain](https://basebrain.ai), I'm going around these with further sharding and by using a different database for analytics, [Workers Analytics Engine](https://blog.cloudflare.com/workers-analytics-engine/).
