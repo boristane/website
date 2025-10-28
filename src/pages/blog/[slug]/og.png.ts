@@ -1,8 +1,6 @@
 import { type CollectionEntry } from 'astro:content';
-
-import { ImageResponse } from '@vercel/og';
-
-import { getPost, } from '../../../utils/posts';
+import { getPost } from '../../../utils/posts';
+import { generateOGImage } from '../../../utils/og-image';
 
 
 interface Props {
@@ -82,7 +80,7 @@ export async function GET({ params }: Props) {
   };
 
 
-  return new ImageResponse(html, {
+  return generateOGImage(html, {
     width: 1200,
     height: 600,
   });
