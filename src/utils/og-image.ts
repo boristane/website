@@ -1,11 +1,13 @@
 import satori from 'satori';
-import { Resvg } from '@resvg/resvg-js';
+import { initWasm, Resvg } from '@resvg/resvg-wasm';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+let wasmInitialized = false;
 
 interface OGImageOptions {
   width?: number;
@@ -17,6 +19,14 @@ export async function generateOGImage(
   options: OGImageOptions = {}
 ) {
   const { width = 1200, height = 600 } = options;
+
+  // Initialize WASM once
+  if (!wasmInitialized) {
+    const wasmPath = path.join(__dirname, '../../node_modules/@resvg/resvg-wasm/index_bg.wasm');
+    const wasmBuffer = fs.readFileSync(wasmPath);
+    await initWasm(wasmBuffer);
+    wasmInitialized = true;
+  }
 
   // Load fonts from @fontsource/inter
   const fontPath = path.join(__dirname, '../../node_modules/@fontsource/inter/files');
@@ -43,7 +53,7 @@ export async function generateOGImage(
     ],
   });
 
-  // Convert SVG to PNG with resvg
+  // Convert SVG to PNG with resvg-wasm
   const resvg = new Resvg(svg, {
     fitTo: {
       mode: 'width',
@@ -54,7 +64,7 @@ export async function generateOGImage(
   const pngData = resvg.render();
   const pngBuffer = pngData.asPng();
 
-  return new Response(pngBuffer as unknown as BodyInit, {
+  return new Response(pngBuffer, {
     headers: {
       'Content-Type': 'image/png',
       'Cache-Control': 'public, max-age=31536000, immutable',
