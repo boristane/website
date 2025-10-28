@@ -4,6 +4,7 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import UnoCSS from 'unocss/astro';
 import vue from '@astrojs/vue';
+import mermaid from 'astro-mermaid';
 
 
 import expressiveCode from "astro-expressive-code";
@@ -20,8 +21,11 @@ export default defineConfig({
     wasmModuleImports: true
   }),
   integrations: [
+    mermaid({
+      autoTheme: true
+    }),
     expressiveCode({
-      themes: ['github-dark'],
+      themes: ['catppuccin-latte'],
       plugins: [pluginLineNumbers()],
       styleOverrides: {
         frames: {

@@ -18,7 +18,7 @@ export default defineConfig({
       'border-main': 'border-truegray-300 dark:border-truegray-600',
     },
     {
-      'text-title': 'text-main text-4xl font-800',
+      'text-title': 'text-main text-4xl font-600',
       'nav-link': 'text-main hover:text-sky-600 transition duration-200 cursor-pointer',
       'prose-link': 'text-link text-nowrap cursor-pointer border-b-1 !border-opacity-30 hover:!border-opacity-100 border-sky-600 hover:border-sky-600 dark:border-neutral-500 hover:dark:border-truegray-400 transition-border-color duration-200 decoration-none',
     },
