@@ -73,16 +73,29 @@ id={`modal-${id}`}
 </div>
 
 <script define:vars={{id}}>
-  const image = document.getElementById(`image-wrapper-${id}`);
+  function initializeImageModal() {
+    const image = document.getElementById(`image-wrapper-${id}`);
+    const modal = document.getElementById(`modal-${id}`);
 
-  image?.addEventListener("click", () => {
-    const elt = document.getElementById(`modal-${id}`);
-    elt?.classList.add("show");
-  });
+    if (!image || !modal) return;
 
-  const modal = document.getElementById(`modal-${id}`);
+    const newImage = image.cloneNode(true);
+    image.parentNode?.replaceChild(newImage, image);
 
-  modal?.addEventListener("click", () => {
-    modal?.classList.remove("show");
-  });
+    const newModal = modal.cloneNode(true);
+    modal.parentNode?.replaceChild(newModal, modal);
+
+    newImage.addEventListener("click", () => {
+      const elt = document.getElementById(`modal-${id}`);
+      elt?.classList.add("show");
+    });
+
+    newModal.addEventListener("click", () => {
+      newModal.classList.remove("show");
+    });
+  }
+
+  initializeImageModal();
+
+  document.addEventListener("astro:page-load", initializeImageModal);
 </script>
