@@ -43,7 +43,9 @@ const {
       {
         newsletter && (
           <div class="mt-6 pt-6 border-t border-gray-200">
-            <div class="mb-4 text-sm">Join my newsletter to be the first to know about new blog posts :)</div>
+            <div class="mb-4 text-sm">
+              Join my newsletter to be the first to know about new blog posts :)
+            </div>
             <script
               async
               data-uid="65bc3a0932"
@@ -70,17 +72,20 @@ const {
     </main>
     <Footer />
     <script>
-      import mermaid from 'mermaid';
+      import mermaid from "mermaid";
 
       mermaid.initialize({
         startOnLoad: false,
-        theme: 'default',
+        theme: "default",
       });
 
       async function renderMermaidDiagrams() {
-        await new Promise(resolve => setTimeout(resolve, 0));
+        // Give the DOM more time to settle on mobile devices
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
-        const mermaidElements = document.querySelectorAll('.mermaid:not([data-processed])');
+        const mermaidElements = document.querySelectorAll(
+          ".mermaid:not([data-processed])",
+        );
 
         if (mermaidElements.length === 0) {
           return;
@@ -88,31 +93,53 @@ const {
 
         for (const element of mermaidElements) {
           try {
-            element.setAttribute('data-processed', 'true');
+            // Ensure element is in the DOM and visible
+            if (!document.body.contains(element)) {
+              continue;
+            }
+
+            element.setAttribute("data-processed", "true");
 
             const graphDefinition = element.textContent;
 
-            if (!graphDefinition || graphDefinition.trim() === '') {
+            if (!graphDefinition || graphDefinition.trim() === "") {
               continue;
             }
 
             const id = `mermaid-${Math.random().toString(36).substring(2, 11)}`;
 
-            const { svg } = await mermaid.render(id, graphDefinition);
+            // Render with timeout to prevent hanging on mobile
+            const renderPromise = mermaid.render(id, graphDefinition);
+            const timeoutPromise = new Promise((_, reject) =>
+              setTimeout(() => reject(new Error("Render timeout")), 10000)
+            );
+
+            const { svg } = await Promise.race([renderPromise, timeoutPromise]);
 
             element.innerHTML = svg;
           } catch (error) {
-            console.error('Mermaid rendering error for element:', error);
-            element.removeAttribute('data-processed');
+            console.error("Mermaid rendering error for element:", error);
+            element.removeAttribute("data-processed");
+            
+            const mermaidErrorElements = document.querySelectorAll(
+              '[id^="d"][id*="mermaid-"]',
+            );
+            mermaidErrorElements.forEach((el) => {
+              if (el.parentNode) {
+                el.parentNode.removeChild(el);
+              }
+            });
+            // Hide the element instead of trying to clean up error elements
+            // (element as HTMLElement).style.display = "none";
           }
         }
       }
 
       // Initial load
-      document.addEventListener('DOMContentLoaded', renderMermaidDiagrams);
+      document.addEventListener("DOMContentLoaded", renderMermaidDiagrams);
 
       // Re-render on page transitions
-      document.addEventListener('astro:page-load', renderMermaidDiagrams);
+      document.addEventListener("astro:page-load", renderMermaidDiagrams);
     </script>
   </body>
 </html>
