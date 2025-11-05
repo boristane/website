@@ -559,6 +559,10 @@ export class SubscriptionManager extends DurableObject {
 }
 ```
 
+When you schedule an alarm, Cloudflare guarantees it will fire at least once. If your `alarm()` method throws an exception, it automatically retries up to 6 times with exponential backoff (starting at 2 seconds).
+
+You don't need to write retry logic, just make sure your `alarm()` method is idempotent (safe to run multiple times) since it could potentially execute more than once.
+
 ## When Should You Use Durable Objects?
 
 Here's my mini-decision framework:
