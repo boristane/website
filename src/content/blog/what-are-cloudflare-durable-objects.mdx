@@ -135,11 +135,11 @@ export class DurableWorkspace extends DurableObject {
 
     // Run migrations on first access
     ctx.blockConcurrencyWhile(async () => {
-      await this.migrate();
+      this.migrate();
     });
   }
 
-  async migrate() {
+  migrate() {
     // Create tables if they don't exist
     this.sql.exec(`
       CREATE TABLE IF NOT EXISTS projects (
@@ -692,7 +692,7 @@ The Cloudflare [`agents` SDK](https://agents.cloudflare.com/) ([`npm i agents`](
 
 ### What Does the Agents SDK Give You?
 
-The `Agent` base class (which you saw earlier when I showed you the `Neuron` class extending it) provides:
+The `Agent` base class provides:
 
 1. **WebSocket handling out of the box** - `onConnect()`, `onMessage()`, `onClose()` lifecycle methods
 2. **HTTP request handling** - `onRequest()` method with clean routing
