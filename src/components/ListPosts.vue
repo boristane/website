@@ -61,9 +61,10 @@ function getYear(date: Date | string | number) {
         <div flex="~ col" md:flex="~ row gap-0 items-center" flex-wrap :class="mini ? 'text-sm' : 'text-lg'">
           <time w-32 :datetime="getDate(post.data.date)" v-if="mini" flex-none>{{ post.data.date }}</time>
           <a :target="getTarget(post)" :href="getHref(post)" nav-link :class="mini ? 'text-lg text-link' : 'text-2xl'">
-            <span lh-normal>
-              <i v-if="post.data.draft" text-base vertical-mid i-ri-draft-line />
+            <span lh-normal inline-flex items-center>
+              <i v-if="post.data.draft" text-base i-ri-draft-line />
               {{ post.data.title }}
+              <i v-if="post.data.redirect" text-base i-ri-external-link-line ml-1 />
             </span>
           </a>
         </div>

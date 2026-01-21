@@ -37,6 +37,11 @@ if (post === undefined) {
   return new Response(JSON.stringify(await getAllPosts()));
 }
 
+// Redirect if this is an external link post
+if (post.data.redirect) {
+  return Astro.redirect(post.data.redirect, 301);
+}
+
 const allPosts = (await getPosts("blog")) as any[];
 let next = undefined as any;
 const postIndex = allPosts.findIndex((p) => p.slug === post.slug);
