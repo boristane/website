@@ -8,13 +8,52 @@ export type Props = {
   description?: string;
   image?: { src: string; alt?: string };
   pageType?: "website" | "article";
+  articleSchema?: {
+    headline: string;
+    datePublished: string;
+    description?: string;
+  };
 };
 
 const {
   description = "Hello, I'm Boris Tane, and I build software. This is my personal website with my blog and all the talks and projects I'm working on.",
   image = siteConfig.image,
   pageType = "website",
+  articleSchema,
 } = Astro.props;
+
+// Person schema for site-wide use
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": siteConfig.author,
+  "url": siteConfig.site,
+  "jobTitle": "Engineering Lead",
+  "worksFor": {
+    "@type": "Organization",
+    "name": "Cloudflare"
+  },
+  "description": siteConfig.bio,
+  "sameAs": siteConfig.footerNavLinks.map(link => link.href)
+};
+
+// Article schema (only included if articleSchema prop is provided)
+const articleJsonLd = articleSchema ? {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": articleSchema.headline,
+  "author": {
+    "@type": "Person",
+    "name": siteConfig.author,
+    "url": siteConfig.site
+  },
+  "datePublished": articleSchema.datePublished,
+  "description": articleSchema.description || description,
+  "publisher": {
+    "@type": "Person",
+    "name": siteConfig.author
+  }
+} : null;
 const title = [Astro.props.title || "Boris Tane", siteConfig.title].filter(Boolean).join(" | ");
 const resolvedImage = image?.src
   ? {
@@ -89,6 +128,10 @@ function formatCanonicalURL(url: string | URL) {
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 <link rel="alternate" type="application/rss+xml" href="/rss.xml" title="RSS" />
+
+<!-- Schema.org JSON-LD -->
+<script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+{articleJsonLd && <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} />}
 
 <!-- Page Metadata -->
 <link rel="canonical" href={formatCanonicalURL(canonicalURL)} />

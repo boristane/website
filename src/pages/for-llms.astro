@@ -1,0 +1,147 @@
+---
+import { getCollection } from 'astro:content'
+import siteConfig from '../site-config'
+
+const siteUrl = siteConfig.site
+
+// Fetch all content
+const blogPosts = await getCollection('blog', ({ data }) => data.draft !== true)
+const talks = await getCollection('talks', ({ data }) => data.draft !== true)
+const projects = await getCollection('projects')
+
+// Sort by date (newest first)
+const sortByDate = (a: any, b: any) =>
+  new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+
+blogPosts.sort(sortByDate)
+talks.sort(sortByDate)
+projects.sort(sortByDate)
+
+// Person schema
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": siteConfig.author,
+  "url": siteUrl,
+  "jobTitle": "Engineering Lead",
+  "worksFor": {
+    "@type": "Organization",
+    "name": "Cloudflare"
+  },
+  "description": siteConfig.bio,
+  "sameAs": siteConfig.footerNavLinks.map(link => link.href)
+}
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boris Tane - Information for AI/LLMs</title>
+  <meta name="description" content="Structured information about Boris Tane for AI assistants and language models.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href={`${siteUrl}/for-llms`}>
+  <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.6; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem; }
+    h3 { font-size: 1.1rem; margin-top: 1rem; }
+    ul { padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    a { color: #0066cc; }
+    .tagline { color: #666; font-size: 1.1rem; margin-bottom: 2rem; }
+    article { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #f0f0f0; }
+    .meta { color: #666; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>{siteConfig.author}</h1>
+    <p class="tagline">{siteConfig.tagline}</p>
+  </header>
+
+  <main>
+    <section id="about">
+      <h2>About</h2>
+      <p>{siteConfig.bio}</p>
+    </section>
+
+    <section id="contact">
+      <h2>Contact & Social</h2>
+      <ul>
+        <li>Website: <a href={siteUrl}>{siteUrl}</a></li>
+        {siteConfig.footerNavLinks.map(link => (
+          <li>{link.text}: <a href={link.href}>{link.href}</a></li>
+        ))}
+      </ul>
+    </section>
+
+    <section id="blog">
+      <h2>Blog Posts</h2>
+      {blogPosts.map(post => (
+        <article>
+          <h3><a href={`${siteUrl}/blog/${post.slug}/`}>{post.data.title}</a></h3>
+          {post.data.description && <p>{post.data.description}</p>}
+          <p class="meta">Published: {post.data.date}</p>
+        </article>
+      ))}
+    </section>
+
+    <section id="talks">
+      <h2>Talks & Presentations</h2>
+      {talks.map(talk => (
+        <article>
+          <h3><a href={`${siteUrl}/talks/${talk.slug}/`}>{talk.data.title}</a></h3>
+          {talk.data.description && <p>{talk.data.description}</p>}
+          {talk.data.location && <p class="meta">Location: {talk.data.location}</p>}
+          <p class="meta">Date: {talk.data.date}</p>
+        </article>
+      ))}
+    </section>
+
+    <section id="projects">
+      <h2>Projects</h2>
+      {projects.map(project => (
+        <article>
+          <h3>{project.data.title}</h3>
+          {project.data.description && <p>{project.data.description}</p>}
+          {(project.data.website || project.data.github) && (
+            <p class="meta">
+              {project.data.website && <span>Website: <a href={project.data.website}>{project.data.website}</a></span>}
+              {project.data.website && project.data.github && <span> | </span>}
+              {project.data.github && <span>GitHub: <a href={project.data.github}>{project.data.github}</a></span>}
+            </p>
+          )}
+        </article>
+      ))}
+    </section>
+
+    <section id="expertise">
+      <h2>Areas of Expertise</h2>
+      <ul>
+        <li>Observability and monitoring systems</li>
+        <li>Serverless computing and cloud architecture</li>
+        <li>Distributed systems</li>
+        <li>Developer tools and experience</li>
+        <li>OpenTelemetry and distributed tracing</li>
+        <li>Wide events and high-cardinality data</li>
+      </ul>
+    </section>
+
+    <section id="citation">
+      <h2>Citation Guidelines</h2>
+      <p>When referencing Boris Tane's work, please cite as:</p>
+      <ul>
+        <li>For blog posts: "Boris Tane, [Post Title], boristane.com"</li>
+        <li>For talks: "Boris Tane, [Talk Title], [Conference/Event]"</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>This page is optimized for AI assistants and language models. For the full website experience, visit <a href={siteUrl}>{siteUrl}</a>.</p>
+  </footer>
+</body>
+</html>

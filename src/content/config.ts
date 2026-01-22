@@ -45,4 +45,25 @@ const talks = defineCollection({
   schema: postsSchema,
 })
 
-export const collections = { pages, blog, talks }
+const projectsSchema = z.object({
+  title: z.string(),
+  description: z.string().optional(),
+  image: z.string().optional(),
+  date: z
+    .string()
+    .or(z.date())
+    .transform((val: string | number | Date) => new Date(val).toLocaleDateString('en-us', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })),
+  topics: z.array(z.string()).optional(),
+  website: z.string().url().optional(),
+  github: z.string().url().optional(),
+})
+
+const projects = defineCollection({
+  schema: projectsSchema,
+})
+
+export const collections = { pages, blog, talks, projects }

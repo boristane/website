@@ -13,6 +13,7 @@ const {
   next,
   comments = false,
   newsletter = false,
+  articleSchema,
   ...head
 } = Astro.props;
 ---
@@ -20,7 +21,7 @@ const {
 <!doctype html>
 <html lang="en">
   <head>
-    <BaseHead {...head} />
+    <BaseHead {...head} articleSchema={articleSchema} />
     <ViewTransitions />
   </head>
   <body class="bg-main text-main min-h-screen font-sans w-full">
