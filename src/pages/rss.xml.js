@@ -1,4 +1,5 @@
 import rss from '@astrojs/rss'
+import { marked } from 'marked'
 import siteConfig from '../site-config'
 import { getAllPosts } from '../utils/posts'
 
@@ -30,7 +31,7 @@ export async function GET(context) {
         link: `/${item.collection}/${item.slug}/`,
         pubDate: new Date(item.data.date),
         author: `${siteConfig.author}`,
-        content: cleanContent,
+        content: marked.parse(cleanContent),
       }
     }),
   })
