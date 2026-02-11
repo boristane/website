@@ -27,25 +27,12 @@ flowchart LR
 
 Every meaningful task starts with a deep-read directive. I ask Claude to thoroughly understand the relevant part of the codebase before doing anything else. And I always require the findings to be written into a persistent markdown file, never just a verbal summary in the chat.
 
-```
-read this folder in depth, understand how it works deeply, what it does
-and all its specificities. when that's done, write a detailed report of
-your learnings and findings in research.md
-```
 
-```
-study the notification system in great details, understand the
-intricacies of it and write a detailed research.md document with
-everything there is to know about how notifications work
-```
+> read this folder in depth, understand how it works deeply, what it does and all its specificities. when that's done, write a detailed report of your learnings and findings in research.md
 
-```
-go through the task scheduling flow, understand it deeply and look for
-potential bugs. there definitely are bugs in the system as it sometimes
-runs tasks that should have been cancelled. keep researching the flow
-until you find all the bugs, don't stop until all the bugs are found.
-when you're done, write a detailed report of your findings in research.md
-```
+> study the notification system in great details, understand the intricacies of it and write a detailed research.md document with everything there is to know about how notifications work
+
+> go through the task scheduling flow, understand it deeply and look for potential bugs. there definitely are bugs in the system as it sometimes runs tasks that should have been cancelled. keep researching the flow until you find all the bugs, don't stop until all the bugs are found. when you're done, write a detailed report of your findings in research.md
 
 Notice the language: **"deeply"**, **"in great details"**, **"intricacies"**, **"go through everything"**. This isn't fluff. Without these words, Claude will skim. It'll read a file, see what a function does at the signature level, and move on. You need to signal that surface-level reading is not acceptable.
 
@@ -57,17 +44,10 @@ This is the most expensive failure mode with AI-assisted coding, and it's not wr
 
 Once I've reviewed the research, I ask for a detailed implementation plan in a separate markdown file.
 
-```
-I want to build a new feature <name and description> that extends the
-system to perform <business outcome>. write a detailed plan.md document
-outlining how to implement this. include code snippets
-```
 
-```
-the list endpoint should support cursor-based pagination instead of
-offset. write a detailed plan.md for how to achieve this. read source
-files before suggesting changes, base the plan on the actual codebase
-```
+> I want to build a new feature \<name and description> that extends the system to perform \<business outcome>. write a detailed plan.md document outlining how to implement this. include code snippets
+
+> the list endpoint should support cursor-based pagination instead of offset. write a detailed plan.md for how to achieve this. read source files before suggesting changes, base the plan on the actual codebase
 
 The generated plan always includes a detailed explanation of the approach, code snippets showing the actual changes, file paths that will be modified, and considerations and trade-offs.
 
@@ -106,10 +86,7 @@ Some real examples of notes I'd add:
 
 Then I send Claude back to the document:
 
-```
-I added a few notes to the document, address all the notes and update
-the document accordingly. don't implement yet
-```
+> I added a few notes to the document, address all the notes and update the document accordingly. don't implement yet
 
 **This cycle repeats 1 to 6 times.** The explicit **"don't implement yet"** guard is essential. Without it, Claude will jump to code the moment it thinks the plan is good enough. It's not good enough until I say it is.
 
@@ -125,10 +102,8 @@ Three rounds of "I added notes, update the plan" can transform a generic impleme
 
 Before implementation starts, I always request a granular task breakdown:
 
-```
-add a detailed todo list to the plan, with all the phases and individual
-tasks necessary to complete the plan - don't implement yet
-```
+> add a detailed todo list to the plan, with all the phases and individual tasks necessary to complete the plan - don't implement yet
+
 
 This creates a checklist that serves as a progress tracker during implementation. Claude marks items as completed as it goes, so I can glance at the plan at any point and see exactly where things stand. Especially valuable in sessions that run for hours.
 
@@ -136,13 +111,7 @@ This creates a checklist that serves as a progress tracker during implementation
 
 When the plan is ready, I issue the implementation command. I've refined this into a standard prompt I reuse across sessions:
 
-```
-implement it all. when you're done with a task or phase, mark it as
-completed in the plan document. do not stop until all tasks and phases
-are completed. do not add unnecessary comments or jsdocs, do not use any
-or unknown types. continuously run typecheck to make sure you're not
-introducing new issues.
-```
+> implement it all. when you're done with a task or phase, mark it as completed in the plan document. do not stop until all tasks and phases are completed. do not add unnecessary comments or jsdocs, do not use any or unknown types. continuously run typecheck to make sure you're not introducing new issues.
 
 This single prompt encodes everything that matters:
 

@@ -26,6 +26,22 @@ html.dark .astro-code span {
 }
 
 /* ==========================================
+   Blockquote Styling
+   ========================================== */
+
+.prose blockquote {
+  border-left: 3px solid #3b82f6;
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: #4b5563;
+}
+
+html.dark .prose blockquote {
+  color: #9ca3af;
+}
+
+/* ==========================================
    Table Styling
    ========================================== */
 
