@@ -78,7 +78,7 @@ const isoDate = typeof rawDate === 'string' ? new Date(rawDate).toISOString() : 
   tags={tags}
   next={next}
   newsletter={true}
-  nominal={true}
+  nominal={false}
   articleSchema={{
     headline: title,
     datePublished: isoDate,
@@ -122,6 +122,7 @@ const isoDate = typeof rawDate === 'string' ? new Date(rawDate).toISOString() : 
 
       <div class="max-w-none prose">
         <Content />
+        <p>I'm also building <a href="https://nominal.dev" target="_blank" rel="noopener noreferrer">nominal.dev</a>, because nobody should be on-call in 2026.</p>
       </div>
     </article>
 
