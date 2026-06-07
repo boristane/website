@@ -13,7 +13,7 @@ const {
   next,
   comments = false,
   newsletter = false,
-  nominal = false,
+  polylane = false,
   articleSchema,
   ...head
 } = Astro.props;
@@ -35,7 +35,7 @@ const {
             <PageOperate
               client:load
               showShare={head.pageType === "article"}
-              nominal={nominal}
+              polylane={polylane}
               url={Astro.url}
               tags={tags}
               next={next}
