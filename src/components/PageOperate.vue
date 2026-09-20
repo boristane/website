@@ -48,7 +48,7 @@ function toTop() {
       <div v-if="polylane" flex="~ gap-2 items-center" mb-2>
         <i i-ri-arrow-right-s-line flex-none />
         <span>I'm building</span>
-        <a prose-link href="https://polylane.com" target="_blank" rel="noopener noreferrer">polylane</a>,
+        <a prose-link href="https://polylane.com" target="_blank" rel="noopener noreferrer">Polylane</a>,
         <span>check it out</span>
       </div>
       <div v-if="showShare" flex="~ gap-2 items-center flex-wrap" mb-2>
