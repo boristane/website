@@ -111,3 +111,16 @@ html.dark .prose tbody tr:hover {
     font-size: 0.8125rem;
   }
 }
+/* ==========================================
+   Mermaid Styling
+   ========================================== */
+
+/* Mermaid sizes label boxes before the SVG lands in .prose, so prose
+   margins and line-height on the label <p> push text out of its box. */
+.prose .mermaid foreignObject div,
+.prose .mermaid foreignObject span,
+.prose .mermaid foreignObject p {
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+}
